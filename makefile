@@ -1,6 +1,6 @@
-CC      := x86_64-elf-gcc
-AR      := x86_64-elf-ar
-AS      := x86_64-elf-gcc
+CC      := gcc
+AR      := ar
+AS      := gcc
 
 SRC_DIR := src
 INC_DIR := include/libc
@@ -37,7 +37,7 @@ OBJS := \
 	$(C_SRCS:$(SRC_DIR)/%.c=$(BUILD)/%.o) \
 	$(S_SRCS:$(SRC_DIR)/%.S=$(BUILD)/%.o)
 
-START := $(BUILD)/exec/start.o
+START := $(BUILD)/start.o
 
 .PHONY: all sysroot clean
 

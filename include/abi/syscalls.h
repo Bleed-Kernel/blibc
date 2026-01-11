@@ -8,4 +8,5 @@ enum {
     SYS_WAITPID,
     SYS_SHUTDOWN,
     SYS_REBOOT,
+    SYS_TKILL,
 };
