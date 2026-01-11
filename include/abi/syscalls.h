@@ -2,7 +2,6 @@ enum {
     SYS_READ,
     SYS_WRITE,
     SYS_EXIT,
-    SYS_CLEAR,
     SYS_YEILD,
     SYS_SPAWN,
     SYS_WAITPID,
