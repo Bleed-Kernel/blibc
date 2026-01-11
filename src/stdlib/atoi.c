@@ -1,5 +1,5 @@
 int atoi(const char *s){
-    int signage = 0;
+    int signage = 1;
     int value   = 0;
 
     while(*s == ' ' || *s == '\t' || *s == '\n' ||
@@ -7,7 +7,7 @@ int atoi(const char *s){
         s++;
     
     if (*s == '-'){
-        signage = 1;
+        signage = -1;
         s++;
     }else if (*s == '+'){
         s++;
