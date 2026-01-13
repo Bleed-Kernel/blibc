@@ -11,4 +11,5 @@ enum {
     SYS_WAITPID,
     SYS_TKILL,
     SYS_MEMINFO,
+    SYS_TIME,
 };

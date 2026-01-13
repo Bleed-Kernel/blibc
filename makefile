@@ -37,7 +37,7 @@ OBJS := \
 	$(C_SRCS:$(SRC_DIR)/%.c=$(BUILD)/%.o) \
 	$(S_SRCS:$(SRC_DIR)/%.S=$(BUILD)/%.o)
 
-START := $(BUILD)/start.o
+START := $(BUILD)/syscalls/start.o
 
 .PHONY: all sysroot clean
 
