@@ -2,6 +2,10 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#define stdin   0
+#define stdout  1
+#define stderr  2
+
 int printf(const char *fmt, ...);
 int fprintf(int fd, const char *fmt, ...);
 int vfprintf(int fd, const char *fmt, va_list ap);

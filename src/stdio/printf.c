@@ -10,6 +10,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <libc/stdlib.h>
+#include <libc/stdio.h>
 #include <libc/syscalls/write.h>
 #include <vendor/nanoprintf.h>
 
@@ -58,7 +59,7 @@ int fprintf(int fd, const char *fmt, ...) {
 int printf(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    int ret = vfprintf(1, fmt, ap);
+    int ret = vfprintf(stdout, fmt, ap);
     va_end(ap);
     return ret;
 }
