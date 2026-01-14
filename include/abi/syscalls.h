@@ -12,4 +12,6 @@ enum {
     SYS_TKILL,
     SYS_MEMINFO,
     SYS_TIME,
+    SYS_ALLOC,
+    SYS_FREE
 };
