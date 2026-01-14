@@ -14,6 +14,6 @@ static inline long syscall_read(int fd, void *buf, unsigned long len) {
     return ret;
 }
 
-int _read(int fd, void *buf, unsigned long len){
+long _read(int fd, void *buf, unsigned long len){
     return syscall_read(fd, buf, len);
 }

@@ -1,2 +1,2 @@
 #pragma once
-int _read(int fd, void *buf, unsigned long len);
+long _read(int fd, void *buf, unsigned long len);
