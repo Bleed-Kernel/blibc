@@ -1,5 +1,4 @@
-#ifndef STDINT_H
-#define STDINT_H
+#pragma once
 
 typedef signed char        int8_t;
 typedef unsigned char      uint8_t;
@@ -40,5 +39,3 @@ typedef long            ptrdiff_t;
 
 typedef int64_t         intmax_t;
 typedef uint64_t        uintmax_t;
-
-#endif
