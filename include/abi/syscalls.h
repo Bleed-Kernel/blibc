@@ -1,3 +1,5 @@
+#pragma once
+
 enum {
     SYS_READ,
     SYS_WRITE,
@@ -13,5 +15,7 @@ enum {
     SYS_MEMINFO,
     SYS_TIME,
     SYS_ALLOC,
-    SYS_FREE
+    SYS_FREE,
+    SYS_CHDIR,
+    SYS_GETCWD,
 };

@@ -55,6 +55,14 @@ int fprintf(int fd, const char *fmt, ...) {
     return ret;
 }
 
+int snprintf(char *buf, size_t size, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int ret = vsnprintf(buf, size, fmt, ap);
+    va_end(ap);
+    return ret;
+}
+
 int printf(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
