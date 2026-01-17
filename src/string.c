@@ -189,6 +189,29 @@ char *strchr(const char *s, int c) {
     return NULL;
 }
 
+/// @brief string concatonation of a size
+/// @param dest destination
+/// @param src start concat
+/// @return char array
+char *strncat(char *dest, const char *src, size_t n) {
+    char *d = dest;
+    size_t dest_len = 0;
+
+    while (*d) {
+        d++;
+        dest_len++;
+    }
+
+    size_t i = 0;
+    while (i < n && src[i]) {
+        d[i] = src[i];
+        i++;
+    }
+
+    d[i] = '\0';
+    return dest;
+}
+
 /// @brief tokenize a string (not thread-safe)
 /// @param s input string or NULL to continue
 /// @param delim delimiter characters

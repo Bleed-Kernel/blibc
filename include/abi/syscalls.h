@@ -18,4 +18,5 @@ enum {
     SYS_FREE,
     SYS_CHDIR,
     SYS_GETCWD,
+    SYS_READDIR
 };

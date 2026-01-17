@@ -50,12 +50,6 @@ char *strcpy(char *restrict dest, const char *restrict src);
 /// @return dest
 char *strncpy(char *restrict dest, const char *restrict src, uint64_t n);
 
-/// @brief concatenate two strings
-/// @param dest destination buffer
-/// @param src string to append
-/// @return dest
-char *strcat(char *restrict dest, const char *restrict src);
-
 /// @brief compare two strings
 /// @param s1 string 1
 /// @param s2 string 2
@@ -74,6 +68,18 @@ int strncmp(const char *s1, const char *s2, uint64_t n);
 /// @param c character
 /// @return pointer or NULL
 char *strchr(const char *s, int c);
+
+/// @brief string concatonation
+/// @param dest destination
+/// @param src start concat
+/// @return char array
+char *strcat(char *dest, const char *src);
+
+/// @brief string concatonation of a size
+/// @param dest destination
+/// @param src start concat
+/// @return char array
+char *strncat(char *dest, const char *src, size_t n);
 
 /// @brief tokenize a string (non-thread-safe)
 /// @param s string or NULL to continue
