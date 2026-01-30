@@ -18,5 +18,7 @@ enum {
     SYS_FREE,
     SYS_CHDIR,
     SYS_GETCWD,
-    SYS_READDIR
+    SYS_READDIR,
+    SYS_TASKINFO,
+    SYS_TASKCOUNT
 };
