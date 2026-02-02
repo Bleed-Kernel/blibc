@@ -11,3 +11,7 @@ static inline int syscall_meminfo(system_memory_info_t *buf) {
     );
     return ret;
 }
+
+int _meminfo(system_memory_info_t *buf){
+    return syscall_meminfo(buf);
+}

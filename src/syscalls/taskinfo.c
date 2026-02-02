@@ -1,18 +1,18 @@
 #include <abi/syscalls.h>
 #include <libc/scheduler.h>
+#include <stdint.h>
 
-static inline int syscall_taskinfo(uint64_t pid, user_task_info_t *buf)
-{
-    int ret;
+uint64_t syscall_taskinfo(uint64_t pid, user_task_info_t *info) {
+    uint64_t ret;
     asm volatile(
         "int $0x80"
         : "=a"(ret)
-        : "a"(SYS_TASKINFO), "D"(pid), "S"(buf)
+        : "a"(SYS_TASKINFO), "D"(pid), "S"(info)
         : "rcx", "r11", "memory"
     );
     return ret;
 }
 
-int _taskinfo(uint64_t pid, user_task_info_t *buf) {
-    return syscall_taskinfo(pid, buf);
+uint64_t _taskinfo(uint64_t pid, user_task_info_t *info){
+    return syscall_taskinfo(pid, info);
 }

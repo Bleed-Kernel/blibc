@@ -32,18 +32,18 @@ int vfprintf(int fd, const char *fmt, va_list ap) {
         va_end(ap_copy);
 
         if (written < 0) {
-            free(buf,size);
+            free(buf);
             return -1;
         }
 
         if ((size_t)written < size) {
             _write(fd, buf, written);
-            free(buf, size);
+            free(buf);
             return written;
         }
 
         size = (size_t)written + 1;
-        free(buf, size);
+        free(buf);
     }
 }
 

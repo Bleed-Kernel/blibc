@@ -1,19 +1,17 @@
-#include <abi/syscalls.h>
 #include <stdint.h>
+#include <abi/syscalls.h>
 
-static inline uint64_t syscall_taskcount(uint64_t *count) {
-    int ret;
+uint64_t syscall_taskcount(void) {
+    uint64_t ret;
     asm volatile(
         "int $0x80"
         : "=a"(ret)
-        : "a"(SYS_TASKCOUNT), "D"(count)
+        : "a"(SYS_TASKCOUNT)
         : "rcx", "r11", "memory"
     );
     return ret;
 }
 
-int _taskcount(uint64_t *count) {
-    if (syscall_taskcount(count) != 0)
-        return 0;
-    return -1;
+uint64_t _taskcount(void){
+    return syscall_taskcount();
 }
