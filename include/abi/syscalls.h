@@ -5,6 +5,7 @@ enum {
     SYS_WRITE,
     SYS_OPEN,
     SYS_CLOSE,
+    SYS_IOCTL,
     SYS_YEILD,
     SYS_SPAWN,
     SYS_SHUTDOWN,
@@ -21,5 +22,8 @@ enum {
     SYS_MMAP,
     SYS_MUNMAP,
     SYS_TASKCOUNT,
-    SYS_TASKINFO
+    SYS_TASKINFO,
+    SYS_MAPFB,
+    SYS_SEEK,
+    SYS_FEMTOSECONDS
 };
