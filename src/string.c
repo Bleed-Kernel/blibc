@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <libc/stdlib.h>
 #include <libc/string.h>
 
 /// @brief move memory from destination to source
@@ -93,6 +94,52 @@ char *strncpy(char *restrict dest, const char *restrict src, uint64_t n) {
     return dest;
 }
 
+char *strrchr(const char *s, int c) {
+    const char *last = NULL;
+    char ch = (char)c;
+
+    while (*s != '\0') {
+        if (*s == ch) {
+            last = s;
+        }
+        s++;
+    }
+
+    if (ch == '\0') {
+        return (char *)s;
+    }
+
+    return (char *)last;
+}
+
+/// @brief find first occurrence of needle in haystack
+/// @param haystack string to search
+/// @param needle substring to find
+/// @return pointer to first match or NULL
+char *strstr(const char *haystack, const char *needle) {
+    if (*needle == '\0') {
+        return (char *)haystack;
+    }
+
+    while (*haystack) {
+        const char *h = haystack;
+        const char *n = needle;
+
+        while (*h && *n && (*h == *n)) {
+            h++;
+            n++;
+        }
+
+        if (*n == '\0') {
+            return (char *)haystack;
+        }
+
+        haystack++;
+    }
+
+    return NULL;
+}
+
 /// @brief concatenate src onto end of dest
 /// @param dest destination string buffer
 /// @param src source string to append
@@ -108,6 +155,22 @@ char *strcat(char *restrict dest, const char *restrict src) {
 
     *d = '\0';
     return dest;
+}
+
+char *strdup(const char *s) {
+    if (s == NULL) {
+        return NULL;
+    }
+
+    size_t len = strlen(s) + 1; // include NUL
+    char *dup = (char *)malloc(len);
+
+    if (dup == NULL) {
+        return NULL;
+    }
+
+    memmove(dup, s, len);
+    return dup;
 }
 
 /// @brief compare two strings
