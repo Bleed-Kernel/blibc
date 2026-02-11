@@ -15,9 +15,6 @@ static inline long sys_exit(long n, long a1) {
 }
 
 void _exit(int code) {
-    uint32_t restore_flags = TTY_ECHO | TTY_CANNONICAL;
-    _ioctl(1, TTY_IOCTL_SET_FLAGS, &restore_flags);
-
     sys_exit(SYS_EXIT, code);
     __builtin_unreachable();
 }
