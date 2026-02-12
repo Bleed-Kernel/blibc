@@ -20,6 +20,7 @@ CFLAGS  := \
 	-fno-pie \
 	-nostdinc \
 	-Iinclude \
+	-Iinclude/libc \
 	-Wall -Wextra -Werror \
 	-std=gnu11
 

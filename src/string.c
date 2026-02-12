@@ -1,4 +1,4 @@
-#include <stdint.h>
+#include <libc/stdint.h>
 #include <libc/stdlib.h>
 #include <libc/string.h>
 
