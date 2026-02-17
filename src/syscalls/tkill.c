@@ -1,10 +1,16 @@
 #include <abi/syscalls.h>
 
-void _tkill(long pid){
+long _tkill(long pid, long sig) {
+    long ret;
+
     asm volatile(
         "int $0x80"
-        : 
-        : "a"(SYS_TKILL), "D"(pid)
+        : "=a"(ret)
+        : "a"(SYS_TKILL),
+          "D"(pid),
+          "S"(sig)
         : "memory"
     );
+
+    return ret;
 }
