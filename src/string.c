@@ -1,6 +1,8 @@
 #include <libc/stdint.h>
 #include <libc/stdlib.h>
+#include <libc/ctype.h>
 #include <libc/string.h>
+#include <libc/strings.h>
 
 /// @brief move memory from destination to source
 /// @param dest destination
@@ -307,4 +309,72 @@ char *strtok_r(char *restrict s, const char *restrict delim, char **restrict sav
 
     *save = NULL;
     return token_start;
+}
+
+int bcmp(const void *s1, const void *s2, size_t n) {
+    return memcmp(s1, s2, n);
+}
+
+void bcopy(const void *src, void *dest, size_t n) {
+    memmove(dest, src, n);
+}
+
+void bzero(void *s, size_t n) {
+    memset(s, 0, n);
+}
+
+char *index(const char *s, int c) {
+    return strchr(s, c);
+}
+
+char *rindex(const char *s, int c) {
+    return strrchr(s, c);
+}
+
+int strcasecmp(const char *s1, const char *s2) {
+    while (*s1 != '\0' && *s2 != '\0') {
+        int c1 = tolower((unsigned char)*s1);
+        int c2 = tolower((unsigned char)*s2);
+        if (c1 != c2) {
+            return (c1 < c2) ? -1 : 1;
+        }
+        s1++;
+        s2++;
+    }
+
+    if (*s1 == *s2) {
+        return 0;
+    }
+
+    return ((unsigned char)*s1 < (unsigned char)*s2) ? -1 : 1;
+}
+
+int strncasecmp(const char *s1, const char *s2, size_t n) {
+    for (size_t i = 0; i < n; i++) {
+        int c1 = tolower((unsigned char)s1[i]);
+        int c2 = tolower((unsigned char)s2[i]);
+
+        if (c1 != c2) {
+            return (c1 < c2) ? -1 : 1;
+        }
+
+        if (s1[i] == '\0') {
+            return 0;
+        }
+    }
+
+    return 0;
+}
+
+int ffs(int i) {
+    if (i == 0) {
+        return 0;
+    }
+
+    int bit = 1;
+    while ((i & 1) == 0) {
+        i >>= 1;
+        bit++;
+    }
+    return bit;
 }

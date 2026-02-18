@@ -3,6 +3,8 @@
 #include <stddef.h>
 
 int atoi(const char *s);
+double atof(const char *s);
+void abort(void) __attribute__((noreturn));
 
 void free(void* ptr);
 void* malloc(size_t size);
@@ -10,3 +12,6 @@ void* realloc(void* ptr, size_t size);
 void* calloc(size_t nmemb, size_t size);
 
 int abs(int x);
+int system(const char *command);
+
+void exit(int code) __attribute__((noreturn));

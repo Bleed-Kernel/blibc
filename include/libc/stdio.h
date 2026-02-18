@@ -4,10 +4,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#define stdin   0
-#define stdout  1
-#define stderr  2
-
 #define SEEK_SET 0
 #define SEEK_CUR 1
 #define SEEK_END 2
@@ -15,8 +11,9 @@
 #define FILE_READ   0x01
 #define FILE_WRITE  0x02
 #define FILE_APPEND 0x04
+#define FILE_STATIC 0x08
 
-typedef struct {
+typedef struct FILE {
     int     fd;
 
     unsigned char *buffer;
@@ -29,16 +26,31 @@ typedef struct {
     int     error;
 } FILE;
 
+extern FILE *const stdin;
+extern FILE *const stdout;
+extern FILE *const stderr;
+
 int printf(const char *fmt, ...);
-int fprintf(int fd, const char *fmt, ...);
-int vfprintf(int fd, const char *fmt, va_list ap);
+int fprintf(FILE *stream, const char *fmt, ...);
+int vfprintf(FILE *stream, const char *fmt, va_list ap);
+int dprintf(int fd, const char *fmt, ...);
+int vdprintf(int fd, const char *fmt, va_list ap);
+int putchar(int c);
+int puts(const char *s);
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 int snprintf(char *buf, size_t size, const char *fmt, ...);
+int sscanf(const char *str, const char *fmt, ...);
 
 FILE *fopen(const char *path, const char *mode);
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
 size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
 int fflush(FILE *stream);
 int fclose(FILE *stream);
+long ftell(FILE *stream);
+int fseek(FILE *stream, long offset, int whence);
+
+//stubs for now
+int remove(const char *path);
+int rename(const char *oldpath, const char *newpath);
 
 int tell(void* handle);

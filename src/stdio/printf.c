@@ -155,7 +155,7 @@ static int write_with_tty_cursor_compat(int fd, const char *buf, size_t len) {
     return 0;
 }
 
-int vfprintf(int fd, const char *fmt, va_list ap) {
+int vdprintf(int fd, const char *fmt, va_list ap) {
     char *buf = NULL;
     size_t size = 256;
 
@@ -187,10 +187,32 @@ int vfprintf(int fd, const char *fmt, va_list ap) {
     }
 }
 
-int fprintf(int fd, const char *fmt, ...) {
+int dprintf(int fd, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
-    int ret = vfprintf(fd, fmt, ap);
+    int ret = vdprintf(fd, fmt, ap);
+    va_end(ap);
+    return ret;
+}
+
+int vfprintf(FILE *stream, const char *fmt, va_list ap) {
+    int ret;
+
+    if (!stream) {
+        return -1;
+    }
+
+    ret = vdprintf(stream->fd, fmt, ap);
+    if (ret < 0) {
+        stream->error = 1;
+    }
+    return ret;
+}
+
+int fprintf(FILE *stream, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int ret = vfprintf(stream, fmt, ap);
     va_end(ap);
     return ret;
 }
