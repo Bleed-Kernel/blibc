@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
+
 int atoi(const char *s);
 double atof(const char *s);
 void abort(void) __attribute__((noreturn));
