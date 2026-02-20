@@ -104,6 +104,8 @@ char *strrchr(const char *s, int c);
 
 char *strstr(const char *haystack, const char *needle);
 
+char *strerror(int errnum);
+
 /// @brief tokenize a string (non-thread-safe)
 /// @param s string or NULL to continue
 /// @param delim delimiter characters
