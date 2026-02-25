@@ -225,6 +225,15 @@ int snprintf(char *buf, size_t size, const char *fmt, ...) {
     return ret;
 }
 
+int sprintf(char *str, const char *fmt, ...) {
+    va_list ap;
+    int rc;
+    va_start(ap, fmt);
+    rc = vsnprintf(str, (size_t)-1, fmt, ap);
+    va_end(ap);
+    return rc;
+}
+
 int printf(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
