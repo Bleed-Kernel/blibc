@@ -24,35 +24,18 @@ int memcmp(const void *s1, const void *s2, uint64_t n);
 void *memmove(void *dest, const void *src, uint64_t n);
 
 /// @brief set memory to a location
-/// @param s memory 
-/// @param c address to set
+/// @param s memory
+/// @param c value to set
 /// @param n size
-/// @return void
-static inline void *memset(void *s, int c, uint64_t n) {
-    uint8_t *p = (uint8_t *)s;
-
-    for (uint64_t i = 0; i < n; i++) {
-        p[i] = (uint8_t)c;
-    }
-
-    return s;
-}
+/// @return s
+void *memset(void *s, int c, uint64_t n);
 
 /// @brief copy memory from one location to another
 /// @param dest destination
 /// @param src source
 /// @param n size
 /// @return dest
-static inline void *memcpy(void *restrict dest, const void *restrict src, uint64_t n) {
-    uint8_t *restrict pdest = (uint8_t *restrict)dest;
-    const uint8_t *restrict psrc = (const uint8_t *restrict)src;
-
-    for (uint64_t i = 0; i < n; i++) {
-        pdest[i] = psrc[i];
-    }
-
-    return dest;
-}
+void *memcpy(void *restrict dest, const void *restrict src, uint64_t n);
 
 /// @brief copy a string
 /// @param dest destination buffer
