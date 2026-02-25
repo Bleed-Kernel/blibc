@@ -155,6 +155,10 @@ static int write_with_tty_cursor_compat(int fd, const char *buf, size_t len) {
     return 0;
 }
 
+int vsprintf(char *str, const char *fmt, va_list ap) {
+    return vsnprintf(str, (size_t)-1, fmt, ap);
+}
+
 int vdprintf(int fd, const char *fmt, va_list ap) {
     char *buf = NULL;
     size_t size = 256;
