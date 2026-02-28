@@ -6,6 +6,8 @@ typedef enum {
     TASK_READY,
     TASK_RUNNING,
     TASK_BLOCKED,
+    TASK_STOPPED,
+    TASK_ZOMBIE,
     TASK_DEAD
 } task_state_t;
 
@@ -18,6 +20,9 @@ typedef enum {
 
 typedef struct user_task_info {
     uint64_t        id;
+    uint64_t        ppid;
+    uint64_t        pgid;
+    uint64_t        sid;
     task_state_t    state;
     task_privil_t   privilege_level;
     uint32_t        quantum_remaining;
