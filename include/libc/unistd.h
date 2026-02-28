@@ -14,3 +14,4 @@ off_t lseek(int fd, off_t offset, int whence);
 int chdir(const char *path);
 char *getcwd(char *buf, size_t size);
 int isatty(int fd);
+pid_t getpid(void);

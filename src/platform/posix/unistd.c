@@ -4,6 +4,7 @@
 #include <libc/errno.h>
 #include <libc/syscalls/chdir.h>
 #include <libc/syscalls/getcwd.h>
+#include <libc/syscalls/getpid.h>
 #include <libc/syscalls/ioctl.h>
 #include <libc/syscalls/read.h>
 #include <libc/syscalls/seek.h>
@@ -59,4 +60,11 @@ int isatty(int fd) {
         return 0;
     }
     return 1;
+}
+
+pid_t getpid(void) {
+    long ret = _getpid();
+    if (ret < 0)
+        return (pid_t)posix_errno_from_ret(ret);
+    return (pid_t)ret;
 }
