@@ -8,6 +8,8 @@
 #define SEEK_CUR 1
 #define SEEK_END 2
 
+#define EOF (-1)
+
 #define FILE_READ   0x01
 #define FILE_WRITE  0x02
 #define FILE_APPEND 0x04

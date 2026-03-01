@@ -7,6 +7,7 @@
 
 int atoi(const char *s);
 double atof(const char *s);
+long strtol(const char *nptr, char **endptr, int base);
 void abort(void) __attribute__((noreturn));
 
 void free(void* ptr);
