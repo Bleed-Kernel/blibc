@@ -19,3 +19,9 @@ pid_t waitpid(pid_t pid, int *status, int options) {
     if (status) *status = 0;
     return (pid_t)ret;
 }
+
+pid_t wait(int *status) {
+    errno = ENOSYS;
+    (void)status;
+    return -1;
+}

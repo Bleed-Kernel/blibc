@@ -15,3 +15,14 @@ int chdir(const char *path);
 char *getcwd(char *buf, size_t size);
 int isatty(int fd);
 pid_t getpid(void);
+
+pid_t fork(void);
+int execve(const char *path, char *const argv[], char *const envp[]);
+int execv(const char *path, char *const argv[]);
+int execvp(const char *file, char *const argv[]);
+int execvpe(const char *file, char *const argv[], char *const envp[]);
+int execl(const char *path, const char *arg0, ...);
+int execlp(const char *file, const char *arg0, ...);
+int execle(const char *path, const char *arg0, ...);
+
+extern char **environ;

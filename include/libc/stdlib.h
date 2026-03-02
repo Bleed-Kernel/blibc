@@ -18,4 +18,6 @@ void* calloc(size_t nmemb, size_t size);
 int abs(int x);
 int system(const char *command);
 
+char *getenv(const char *name);
+
 void exit(int code) __attribute__((noreturn));

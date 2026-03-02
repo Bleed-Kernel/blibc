@@ -28,5 +28,7 @@ enum {
     SYS_SIGACTION,
     SYS_SIGPROCMASK,
     SYS_SIGRETURN,
-    SYS_GETPID
+    SYS_GETPID,
+    SYS_FORK,
+    SYS_EXEC
 };
