@@ -30,5 +30,7 @@ enum {
     SYS_SIGRETURN,
     SYS_GETPID,
     SYS_FORK,
-    SYS_EXEC
+    SYS_EXEC,
+    SYS_IPC_SEND,
+    SYS_IPC_RECV
 };

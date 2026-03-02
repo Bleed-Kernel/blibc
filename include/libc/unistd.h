@@ -2,6 +2,7 @@
 
 #include <libc/types.h>
 #include <libc/stddef.h>
+#include <libc/ipc.h>
 
 #define STDIN_FILENO  0
 #define STDOUT_FILENO 1
@@ -24,5 +25,8 @@ int execvpe(const char *file, char *const argv[], char *const envp[]);
 int execl(const char *path, const char *arg0, ...);
 int execlp(const char *file, const char *arg0, ...);
 int execle(const char *path, const char *arg0, ...);
+
+int ipc_send(pid_t target_pid, void *addr, size_t pages);
+int ipc_recv(ipc_message_t *msg);
 
 extern char **environ;

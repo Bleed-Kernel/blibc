@@ -10,6 +10,7 @@
 #include <libc/syscalls/fork.h>
 #include <libc/syscalls/getcwd.h>
 #include <libc/syscalls/getpid.h>
+#include <libc/syscalls/ipc.h>
 #include <libc/syscalls/ioctl.h>
 #include <libc/syscalls/read.h>
 #include <libc/syscalls/seek.h>
@@ -146,6 +147,25 @@ pid_t getpid(void) {
     if (ret < 0)
         return (pid_t)posix_errno_from_ret(ret);
     return (pid_t)ret;
+}
+
+int ipc_send(pid_t target_pid, void *addr, size_t pages) {
+    long ret = _ipc_send((uint64_t)target_pid, (uint64_t)(uintptr_t)addr, (uint64_t)pages);
+    if (ret < 0)
+        return (int)posix_errno_from_ret(ret);
+    return (int)ret;
+}
+
+int ipc_recv(ipc_message_t *msg) {
+    if (!msg) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    long ret = _ipc_recv(msg);
+    if (ret < 0)
+        return (int)posix_errno_from_ret(ret);
+    return (int)ret;
 }
 
 pid_t fork(void) {
