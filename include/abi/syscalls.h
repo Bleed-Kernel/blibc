@@ -32,5 +32,7 @@ enum {
     SYS_FORK,
     SYS_EXEC,
     SYS_IPC_SEND,
-    SYS_IPC_RECV
+    SYS_IPC_RECV,
+    SYS_PIPE,
+    SYS_DUP2
 };

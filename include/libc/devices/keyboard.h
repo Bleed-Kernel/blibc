@@ -193,6 +193,8 @@ static const char keymap_shift[128] = {
 static inline char tty_key_to_ascii(const keyboard_event_t *ev) {
     uint16_t sc = ev->keycode;
     if (sc >= 128) return 0;
+    if (sc == 0x56)
+        return (ev->keymod & KEYMOD_SHIFT) ? '|' : '\\';
     if (ev->keymod & KEYMOD_SHIFT)
         return keymap_shift[sc];
     if (ev->keymod & KEYMOD_CAPS) {

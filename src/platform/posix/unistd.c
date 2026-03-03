@@ -6,12 +6,14 @@
 #include <libc/string.h>
 #include <libc/syscalls/chdir.h>
 #include <libc/syscalls/close.h>
+#include <libc/syscalls/dup2.h>
 #include <libc/syscalls/exec.h>
 #include <libc/syscalls/fork.h>
 #include <libc/syscalls/getcwd.h>
 #include <libc/syscalls/getpid.h>
 #include <libc/syscalls/ipc.h>
 #include <libc/syscalls/ioctl.h>
+#include <libc/syscalls/pipe.h>
 #include <libc/syscalls/read.h>
 #include <libc/syscalls/seek.h>
 #include <libc/syscalls/write.h>
@@ -107,6 +109,23 @@ ssize_t write(int fd, const void *buf, size_t len) {
 
 int close(int fd) {
     long ret = _close(fd);
+    if (ret < 0) return (int)posix_errno_from_ret(ret);
+    return (int)ret;
+}
+
+int dup2(int oldfd, int newfd) {
+    long ret = _dup2(oldfd, newfd);
+    if (ret < 0) return (int)posix_errno_from_ret(ret);
+    return (int)ret;
+}
+
+int pipe(int fds[2]) {
+    if (!fds) {
+        errno = EFAULT;
+        return -1;
+    }
+
+    long ret = _pipe(fds);
     if (ret < 0) return (int)posix_errno_from_ret(ret);
     return (int)ret;
 }
