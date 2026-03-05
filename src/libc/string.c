@@ -3,16 +3,17 @@
 #include <libc/ctype.h>
 #include <libc/string.h>
 #include <libc/strings.h>
+#include <stddef.h>
 
 /// @brief set memory at destination
 /// @param s destination
 /// @param c byte value
 /// @param n size
 /// @return s
-void *memset(void *s, int c, uint64_t n) {
+void *memset(void *s, int c, size_t n) {
     uint8_t *p = (uint8_t *)s;
 
-    for (uint64_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         p[i] = (uint8_t)c;
     }
 
@@ -24,11 +25,11 @@ void *memset(void *s, int c, uint64_t n) {
 /// @param src source
 /// @param n size
 /// @return dest
-void *memcpy(void *restrict dest, const void *restrict src, uint64_t n) {
+void *memcpy(void *restrict dest, const void *restrict src, size_t n) {
     uint8_t *restrict pdest = (uint8_t *restrict)dest;
     const uint8_t *restrict psrc = (const uint8_t *restrict)src;
 
-    for (uint64_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         pdest[i] = psrc[i];
     }
 
@@ -41,16 +42,16 @@ void *memcpy(void *restrict dest, const void *restrict src, uint64_t n) {
 /// @param src source
 /// @param n size to evaluate
 /// @return void
-void *memmove(void *dest, const void *src, uint64_t n) {
+void *memmove(void *dest, const void *src, size_t n) {
     uint8_t *pdest = (uint8_t *)dest;
     const uint8_t *psrc = (const uint8_t *)src;
 
     if (src > dest) {
-        for (uint64_t i = 0; i < n; i++) {
+        for (size_t i = 0; i < n; i++) {
             pdest[i] = psrc[i];
         }
     } else if (src < dest) {
-        for (uint64_t i = n; i > 0; i--) {
+        for (size_t i = n; i > 0; i--) {
             pdest[i-1] = psrc[i-1];
         }
     }
@@ -63,11 +64,11 @@ void *memmove(void *dest, const void *src, uint64_t n) {
 /// @param s2 block 2
 /// @param n size to evaluate
 /// @return result
-int memcmp(const void *s1, const void *s2, uint64_t n) {
+int memcmp(const void *s1, const void *s2, size_t n) {
     const uint8_t *p1 = (const uint8_t *)s1;
     const uint8_t *p2 = (const uint8_t *)s2;
 
-    for (uint64_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         if (p1[i] != p2[i]) {
             return p1[i] < p2[i] ? -1 : 1;
         }
@@ -110,14 +111,13 @@ char *strcpy(char *restrict dest, const char *restrict src) {
 /// @param src source
 /// @param n maximum chars
 /// @return dest
-char *strncpy(char *restrict dest, const char *restrict src, uint64_t n) {
+char *strncpy(char *restrict dest, const char *restrict src, size_t n) {
     char *d = dest;
 
-    for (uint64_t i = 0; i < n; i++) {
+    for (size_t i = 0; i < n; i++) {
         if (src[i] != '\0') {
             d[i] = src[i];
         } else {
-            // pad with zeros
             for (; i < n; i++) {
                 d[i] = '\0';
             }
@@ -196,7 +196,7 @@ char *strdup(const char *s) {
         return NULL;
     }
 
-    size_t len = strlen(s) + 1; // include NUL
+    size_t len = strlen(s) + 1;
     char *dup = (char *)malloc(len);
 
     if (dup == NULL) {
@@ -229,8 +229,8 @@ int strcmp(const char *s1, const char *s2) {
 /// @param s2 string 2
 /// @param n number of chars to compare
 /// @return <0, 0, >0
-int strncmp(const char *s1, const char *s2, uint64_t n) {
-    for (uint64_t i = 0; i < n; i++) {
+int strncmp(const char *s1, const char *s2, size_t n) {
+    for (size_t i = 0; i < n; i++) {
         if (s1[i] != s2[i]) {
             return (s1[i] < s2[i]) ? -1 : 1;
         }
@@ -301,7 +301,6 @@ char *strtok_r(char *restrict s, const char *restrict delim, char **restrict sav
         return NULL;
     }
 
-    // Skip leading delimiters
     while (*s != '\0') {
         const char *d = delim;
         int found = 0;
@@ -325,7 +324,6 @@ char *strtok_r(char *restrict s, const char *restrict delim, char **restrict sav
 
     char *token_start = s;
 
-    // Scan until next delimiter
     while (*s != '\0') {
         const char *d = delim;
         while (*d != '\0') {
