@@ -14,28 +14,28 @@ size_t strlen(const char *string);
 /// @param s2 block 2
 /// @param n size to evaluate
 /// @return result
-int memcmp(const void *s1, const void *s2, uint64_t n);
+int memcmp(const void *s1, const void *s2, size_t n);
 
 /// @brief move memory from source to destination
 /// @param dest destination
 /// @param src source
 /// @param n size to evaluate
 /// @return dest
-void *memmove(void *dest, const void *src, uint64_t n);
+void *memmove(void *dest, const void *src, size_t n);
 
 /// @brief set memory to a location
 /// @param s memory
 /// @param c value to set
 /// @param n size
 /// @return s
-void *memset(void *s, int c, uint64_t n);
+void *memset(void *s, int c, size_t n);
 
 /// @brief copy memory from one location to another
 /// @param dest destination
 /// @param src source
 /// @param n size
 /// @return dest
-void *memcpy(void *restrict dest, const void *restrict src, uint64_t n);
+void *memcpy(void *restrict dest, const void *restrict src, size_t n);
 
 /// @brief copy a string
 /// @param dest destination buffer
@@ -48,7 +48,7 @@ char *strcpy(char *restrict dest, const char *restrict src);
 /// @param src source
 /// @param n max chars
 /// @return dest
-char *strncpy(char *restrict dest, const char *restrict src, uint64_t n);
+char *strncpy(char *restrict dest, const char *restrict src, size_t n);
 
 /// @brief compare two strings
 /// @param s1 string 1
@@ -61,7 +61,7 @@ int strcmp(const char *s1, const char *s2);
 /// @param s2 string 2
 /// @param n number of chars to compare
 /// @return <0, 0, or >0
-int strncmp(const char *s1, const char *s2, uint64_t n);
+int strncmp(const char *s1, const char *s2, size_t n);
 
 /// @brief find first occurrence of a char in a string
 /// @param s string
