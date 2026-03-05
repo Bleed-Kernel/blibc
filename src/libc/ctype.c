@@ -39,6 +39,10 @@ int isspace(int c) {
            c == '\f';
 }
 
+int isblank(int c) {
+    return c == ' ' || c == '\t';
+}
+
 int isprint(int c) {
     return c >= 32 && c < 127;
 }
