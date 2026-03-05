@@ -245,3 +245,7 @@ int printf(const char *fmt, ...) {
     va_end(ap);
     return ret;
 }
+
+int vprintf(const char *fmt, va_list ap) {
+    return vfprintf(stdout, fmt, ap);
+}

@@ -33,6 +33,7 @@ extern FILE *const stdout;
 extern FILE *const stderr;
 
 int printf(const char *fmt, ...);
+int vprintf(const char *fmt, va_list ap);
 int fprintf(FILE *stream, const char *fmt, ...);
 int vfprintf(FILE *stream, const char *fmt, va_list ap);
 int dprintf(int fd, const char *fmt, ...);
