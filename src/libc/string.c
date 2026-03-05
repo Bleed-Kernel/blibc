@@ -207,6 +207,26 @@ char *strdup(const char *s) {
     return dup;
 }
 
+char *strndup(const char *s, size_t n) {
+    if (s == NULL) {
+        return NULL;
+    }
+
+    size_t len = 0;
+    while (len < n && s[len] != '\0') {
+        len++;
+    }
+
+    char *dup = (char *)malloc(len + 1);
+    if (dup == NULL) {
+        return NULL;
+    }
+
+    memmove(dup, s, len);
+    dup[len] = '\0';
+    return dup;
+}
+
 /// @brief compare two strings
 /// @param s1 string 1
 /// @param s2 string 2
