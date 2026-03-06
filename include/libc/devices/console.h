@@ -11,6 +11,7 @@
 #define TTY_IOCTL_GET_CURSOR    0x5403
 #define TTY_IOCTL_SET_CURSOR    0x5404
 #define TTY_IOCTL_GET_WINSIZE   0x5405
+#define TTY_IOCTL_GET_INDEX     0x5406
 
 typedef struct {
     uint32_t x;

@@ -10,6 +10,9 @@ struct fb_info {
 
 #define FB_IOC_GET_INFO 0x5001
 #define FB_IOC_FLIP     0x5002
+#define FB_IOC_ACQUIRE  0x5003
+#define FB_IOC_RELEASE  0x5004
+#define FB_IOC_GET_OWNER 0x5005
 
 #define TTY_IOCTL_GET_FLAGS  0x5401
 #define TTY_IOCTL_SET_FLAGS  0x5402
