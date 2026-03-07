@@ -27,10 +27,16 @@ int fcntl(int fd, int cmd, ...) {
         }
         if (flags & TTY_NONBLOCK) in_flags |= O_NONBLOCK;
         return in_flags;
-    case F_SETFL:
+    case F_SETFL: {
+        int nonblock = 0;
         va_start(ap, cmd);
         in_flags = va_arg(ap, int);
         va_end(ap);
+
+        nonblock = (in_flags & O_NONBLOCK) ? 1 : 0;
+        if (_ioctl(fd, TTY_IOCTL_FIONBIO, &nonblock) == 0)
+            return 0;
+
         if (_ioctl(fd, TTY_IOCTL_GET_FLAGS, &flags) < 0) {
             errno = ENOTTY;
             return -1;
@@ -42,6 +48,7 @@ int fcntl(int fd, int cmd, ...) {
             return -1;
         }
         return 0;
+    }
     default:
         errno = ENOSYS;
         return -1;

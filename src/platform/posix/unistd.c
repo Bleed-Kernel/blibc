@@ -17,6 +17,7 @@
 #include <libc/syscalls/read.h>
 #include <libc/syscalls/seek.h>
 #include <libc/syscalls/write.h>
+#include <libc/termios.h>
 
 #include "compat_errno.h"
 
@@ -152,13 +153,12 @@ char *getcwd(char *buf, size_t size) {
 }
 
 int isatty(int fd) {
-    int flags = 0;
-    long ret = _ioctl(fd, TTY_IOCTL_GET_FLAGS, &flags);
-    if (ret < 0) {
-        errno = ENOTTY;
-        return 0;
-    }
-    return 1;
+    struct termios t;
+    if (tcgetattr(fd, &t) == 0)
+        return 1;
+
+    errno = ENOTTY;
+    return 0;
 }
 
 pid_t getpid(void) {
