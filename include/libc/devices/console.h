@@ -21,6 +21,8 @@
 #define TTY_IOCTL_TIOCGWINSZ    0x5413
 #define TTY_IOCTL_TIOCSWINSZ    0x5414
 #define TTY_IOCTL_FIONBIO       0x5421
+#define TTY_IOCTL_CREATE        0x5422
+#define TTY_IOCTL_SET_ACTIVE    0x5423
 
 typedef struct {
     uint32_t x;
