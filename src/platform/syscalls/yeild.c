@@ -7,7 +7,6 @@ static inline void syscall_yield() {
         : "a"(SYS_YEILD)
         : "rcx", "r11", "memory"
     );
-    __builtin_unreachable();
 }
 
 void _yeild(){

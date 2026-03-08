@@ -23,7 +23,6 @@
 #define TTY_IOCTL_FIONBIO           0x5421
 #define TTY_IOCTL_CREATE            0x5422
 #define TTY_IOCTL_SET_ACTIVE        0x5423
-#define TTY_IOCTL_GET_ACTIVE_INDEX 0x5424
 
 typedef struct {
     uint32_t x;
