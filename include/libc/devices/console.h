@@ -26,6 +26,14 @@
 #define TTY_IOCTL_CREATE            0x5422
 #define TTY_IOCTL_SET_ACTIVE        0x5423
 #define TTY_IOCTL_GET_ACTIVE_INDEX  0x5424
+#define TTY_IOCTL_WM_CLAIM          0x5425
+#define TTY_IOCTL_WM_RELEASE        0x5426
+#define TTY_IOCTL_WM_GET_MODE       0x5427
+#define TTY_IOCTL_WM_SET_MODE       0x5428
+#define TTY_IOCTL_WM_GET_OWNER      0x5429
+#define TTY_IOCTL_WM_SET_FOCUS      0x542A
+#define TTY_IOCTL_WM_GET_FOCUS      0x542B
+#define TTY_IOCTL_GET_ACTIVE_INDEX  0x5424
 
 // Window 
 #define TTY_IOCTL_WM_CLAIM          0x5425
