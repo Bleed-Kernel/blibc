@@ -6,10 +6,23 @@
 static block_t* heap_head = NULL;
 static block_t* heap_tail = NULL;
 
+static size_t align_up(size_t v) {
+    const size_t a = sizeof(uintptr_t) * 2;
+    return (v + (a - 1)) & ~(a - 1);
+}
+
+static int blocks_are_adjacent(block_t *a, block_t *b) {
+    uintptr_t a_end;
+    if (!a || !b)
+        return 0;
+    a_end = (uintptr_t)(a + 1) + a->size;
+    return a_end == (uintptr_t)b;
+}
+
 static void coalesce() {
     block_t* cur = heap_head;
     while (cur && cur->next) {
-        if (cur->free && cur->next->free) {
+        if (cur->free && cur->next->free && blocks_are_adjacent(cur, cur->next)) {
             cur->size += sizeof(block_t) + cur->next->size;
             cur->next = cur->next->next;
             if (cur->next == NULL)
@@ -21,6 +34,7 @@ static void coalesce() {
 }
 
 static void split_block(block_t* b, size_t size) {
+    size = align_up(size);
     if (b->size <= size + sizeof(block_t))
         return;
 
@@ -31,11 +45,14 @@ static void split_block(block_t* b, size_t size) {
 
     b->size = size;
     b->next = newb;
+    if (heap_tail == b)
+        heap_tail = newb;
 }
 
 void* malloc(size_t size) {
     if (!size)
         return NULL;
+    size = align_up(size);
 
     block_t* cur = heap_head;
     while (cur) {
@@ -79,6 +96,7 @@ void* realloc(void* ptr, size_t size) {
         return NULL;
     }
 
+    size = align_up(size);
     block_t* b = ((block_t*)ptr) - 1;
     if (b->size >= size)
         return ptr;
