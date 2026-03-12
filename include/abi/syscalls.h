@@ -34,5 +34,7 @@ enum {
     SYS_IPC_SEND,
     SYS_IPC_RECV,
     SYS_PIPE,
-    SYS_DUP2
+    SYS_DUP2,
+    SYS_UNLINK,
+    SYS_RENAME
 };
