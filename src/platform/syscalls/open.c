@@ -3,12 +3,12 @@
 static inline long syscall_open(const char *path, int flags) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_OPEN),
           "D"(path),
           "S"(flags)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

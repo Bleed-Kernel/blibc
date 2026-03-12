@@ -4,7 +4,7 @@
 uint64_t syscall_taskcount(void) {
     uint64_t ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_TASKCOUNT)
         : "rcx", "r11", "memory"

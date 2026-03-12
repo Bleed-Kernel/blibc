@@ -3,7 +3,7 @@
 static inline int syscall_mkdir(const char *path, int mode) {
     int ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_MKDIR), "D"(path), "S"(mode)
         : "rcx", "r11", "memory"

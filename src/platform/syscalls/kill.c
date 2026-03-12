@@ -4,12 +4,12 @@ long _kill(long pid, long sig) {
     long ret;
 
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_KILL),
           "D"(pid),
           "S"(sig)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
 
     return ret;

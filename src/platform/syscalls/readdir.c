@@ -6,13 +6,13 @@
 static inline long syscall_readdir(int fd, size_t index, dirent_t *out) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_READDIR),
           "D"(fd),
           "S"(index),
           "d"(out)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

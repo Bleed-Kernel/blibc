@@ -3,7 +3,7 @@
 static inline int syscall_close(int fd) {
     int ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_CLOSE), "D"(fd)
         : "rcx", "r11", "memory"

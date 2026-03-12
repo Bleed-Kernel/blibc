@@ -4,10 +4,10 @@ long _getpid(void) {
     long ret;
 
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_GETPID)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
 
     return ret;

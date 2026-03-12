@@ -4,13 +4,13 @@
 static inline long syscall_sigaction(int sig, const sigaction_t *act, sigaction_t *oldact) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_SIGACTION),
           "D"(sig),
           "S"(act),
           "d"(oldact)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

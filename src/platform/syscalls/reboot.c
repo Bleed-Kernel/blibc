@@ -2,7 +2,7 @@
 
 static inline void syscall_reboot() {
     __asm__ volatile (
-        "int $0x80"
+        "syscall"
         :
         : "a"(SYS_REBOOT)
         : "rcx", "r11", "memory"

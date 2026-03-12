@@ -3,7 +3,7 @@
 static inline long syscall_dup2(int oldfd, int newfd) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_DUP2), "D"(oldfd), "S"(newfd)
         : "rcx", "r11", "memory"

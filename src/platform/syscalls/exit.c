@@ -6,7 +6,7 @@
 static inline long sys_exit(long n, long a1) {
     long ret;
     asm volatile (
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(n), "D"(a1)
         : "rcx", "r11", "memory"

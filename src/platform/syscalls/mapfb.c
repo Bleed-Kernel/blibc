@@ -5,11 +5,11 @@
 static inline void* syscall_mapfb(size_t *out_pages) {
     void *ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_MAPFB),
           "D"(out_pages)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

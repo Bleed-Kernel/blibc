@@ -4,10 +4,10 @@ long _sigreturn(void) {
     long ret;
 
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_SIGRETURN)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
 
     return ret;

@@ -4,12 +4,12 @@
 static inline long syscall_stat(const char *path, struct stat *st) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_STAT),
           "D"(path),
           "S"(st)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

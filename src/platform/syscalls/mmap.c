@@ -5,7 +5,7 @@
 static inline void* syscall_mmap(size_t pages) {
     void* ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_MMAP), "D"(pages)
         : "rcx", "r11", "memory"

@@ -3,7 +3,7 @@
 
 static inline void syscall_munmap(void* addr) {
     asm volatile(
-        "int $0x80"
+        "syscall"
         :
         : "a"(SYS_MUNMAP), "D"(addr)
         : "rcx", "r11", "memory"

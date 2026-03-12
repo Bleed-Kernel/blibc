@@ -3,13 +3,13 @@
 static inline long syscall_ioctl(int fd, unsigned long request, void* arg) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_IOCTL),
           "D"(fd),
           "S"(request),
           "d"(arg)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

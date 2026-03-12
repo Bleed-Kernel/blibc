@@ -4,13 +4,13 @@
 static inline long syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_SIGPROCMASK),
           "D"(how),
           "S"(set),
           "d"(oldset)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

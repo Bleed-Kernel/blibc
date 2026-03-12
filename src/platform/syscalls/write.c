@@ -3,7 +3,7 @@
 static inline long sys_write(long n, long a1, long a2, long a3) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(n), "D"(a1), "S"(a2), "d"(a3)
         : "rcx", "r11", "memory"

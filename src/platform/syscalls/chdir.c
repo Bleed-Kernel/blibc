@@ -3,11 +3,11 @@
 static inline long syscall_chdir(const char *path) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_CHDIR),
           "D"(path)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

@@ -2,7 +2,7 @@
 
 static inline void syscall_yield() {
     __asm__ volatile (
-        "int $0x80"
+        "syscall"
         :
         : "a"(SYS_YEILD)
         : "rcx", "r11", "memory"

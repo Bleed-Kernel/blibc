@@ -3,10 +3,10 @@
 static inline long syscall_waitpid(long pid){
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_WAITPID), "D"(pid)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
 
     return ret;

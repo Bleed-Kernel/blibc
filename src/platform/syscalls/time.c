@@ -4,7 +4,7 @@
 static inline int syscall_time(time_t *buf) {
     int ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_TIME), "D"(buf)
         : "rcx", "r11", "memory"

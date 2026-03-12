@@ -3,7 +3,7 @@
 static inline long syscall_read(int fd, void *buf, unsigned long len) {
     long ret;
     __asm__ volatile (
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_READ),
           "D"(fd),

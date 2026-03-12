@@ -3,10 +3,10 @@
 long _fork(void) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_FORK)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

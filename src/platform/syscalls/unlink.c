@@ -3,7 +3,7 @@
 static inline int syscall_unlink(const char *path) {
     int ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_UNLINK), "D"(path)
         : "rcx", "r11", "memory"

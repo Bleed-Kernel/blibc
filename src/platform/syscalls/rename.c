@@ -3,7 +3,7 @@
 static inline int syscall_rename(const char *oldpath, const char *newpath) {
     int ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_RENAME), "D"(oldpath), "S"(newpath)
         : "rcx", "r11", "memory"

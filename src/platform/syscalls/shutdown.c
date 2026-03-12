@@ -2,7 +2,7 @@
 
 static inline void syscall_shutdown() {
     __asm__ volatile (
-        "int $0x80"
+        "syscall"
         :
         : "a"(SYS_SHUTDOWN)
         : "rcx", "r11", "memory"

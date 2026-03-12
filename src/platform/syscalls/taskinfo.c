@@ -5,7 +5,7 @@
 uint64_t syscall_taskinfo(uint64_t pid, user_task_info_t *info) {
     uint64_t ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_TASKINFO), "D"(pid), "S"(info)
         : "rcx", "r11", "memory"

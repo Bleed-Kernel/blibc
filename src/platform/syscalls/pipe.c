@@ -3,7 +3,7 @@
 static inline long syscall_pipe(int fds[2]) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_PIPE), "D"(fds)
         : "rcx", "r11", "memory"

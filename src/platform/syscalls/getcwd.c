@@ -4,12 +4,12 @@
 static inline long syscall_getcwd(char *buf, long size) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_GETCWD),
           "D"(buf),
           "S"(size)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }

@@ -3,13 +3,13 @@
 static inline long syscall_seek(int fd, long offset, int whence) {
     long ret;
     asm volatile(
-        "int $0x80"
+        "syscall"
         : "=a"(ret)
         : "a"(SYS_SEEK),
           "D"(fd),
           "S"(offset),
           "d"(whence)
-        : "memory"
+        : "rcx", "r11", "memory"
     );
     return ret;
 }
