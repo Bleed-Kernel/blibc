@@ -36,5 +36,6 @@ enum {
     SYS_PIPE,
     SYS_DUP2,
     SYS_UNLINK,
-    SYS_RENAME
+    SYS_RENAME,
+    SYS_MKDIR
 };
