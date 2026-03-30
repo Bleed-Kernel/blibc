@@ -22,7 +22,8 @@ CFLAGS  := \
 	-Iinclude \
 	-Iinclude/libc \
 	-Wall -Wextra -Werror \
-	-std=gnu11
+	-std=gnu11 \
+	-O2 \
 
 ASFLAGS := \
 	-ffreestanding \
