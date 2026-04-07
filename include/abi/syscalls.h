@@ -37,5 +37,7 @@ enum {
     SYS_DUP2,
     SYS_UNLINK,
     SYS_RENAME,
-    SYS_MKDIR
+    SYS_MKDIR,
+    SYS_MOUNT,
+    SYS_UMOUNT
 };
