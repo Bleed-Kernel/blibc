@@ -1,6 +1,6 @@
-CC      := gcc
-AR      := ar
-AS      := gcc
+CC      := x86_64-elf-gcc
+AR      := x86_64-elf-ar
+AS      := x86_64-elf-as
 
 SRC_DIR := src
 INC_DIR := include/libc
