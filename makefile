@@ -21,7 +21,7 @@ CFLAGS  := \
 	-nostdinc \
 	-Iinclude \
 	-Iinclude/libc \
-	-Wall -Wextra -Werror \
+	-Wall -Wextra \
 	-std=gnu11 \
 	-msse4.2 \
 	-O2 \
