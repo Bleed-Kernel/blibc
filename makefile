@@ -25,13 +25,6 @@ CFLAGS  := \
 	-std=gnu11 \
 	-O2 \
 
-ASFLAGS := \
-	-ffreestanding \
-	-fno-pic \
-	-fno-pie \
-	-nostdinc \
-	-Iinclude
-
 C_SRCS  := $(sort $(shell find $(SRC_DIR) -type f -name '*.c'))
 S_SRCS  := $(sort $(shell find $(SRC_DIR) -type f -name '*.S'))
 
@@ -62,7 +55,7 @@ $(BUILD)/%.o: $(SRC_DIR)/%.c
 
 $(BUILD)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(dir $@)
-	$(AS) $(ASFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(BUILD)
