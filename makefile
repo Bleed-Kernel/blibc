@@ -23,7 +23,6 @@ CFLAGS  := \
 	-Iinclude/libc \
 	-Wall -Wextra \
 	-std=gnu11 \
-	-msse4.2 \
 	-O2 \
 
 ASFLAGS := \
