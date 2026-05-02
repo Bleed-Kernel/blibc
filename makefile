@@ -1,6 +1,6 @@
 CC      ?= x86_64-elf-gcc
 AR      ?= x86_64-elf-ar
-AS      ?= x86_64-elf-gcc
+AS      ?= x86_64-elf-as
 
 SRC_DIR := src
 INC_DIR := include/libc
@@ -55,7 +55,7 @@ $(BUILD)/%.o: $(SRC_DIR)/%.c
 
 $(BUILD)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(AS) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(BUILD)
