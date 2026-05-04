@@ -55,7 +55,7 @@ $(BUILD)/%.o: $(SRC_DIR)/%.c
 
 $(BUILD)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(dir $@)
-	$(AS) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(BUILD)
