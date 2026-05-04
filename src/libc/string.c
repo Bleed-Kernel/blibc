@@ -281,7 +281,7 @@ char *strchr(const char *s, int c) {
 /// @return char array
 char *strncat(char *dest, const char *src, size_t n) {
     char *d = dest;
-
+    
     while (*d) {
         d++;
     }
