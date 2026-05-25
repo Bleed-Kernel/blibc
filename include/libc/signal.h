@@ -5,6 +5,8 @@
 
 typedef void (*sighandler_t)(int);
 
+typedef int sig_atomic_t; 
+
 #define SIG_ERR ((sighandler_t)-1)
 
 int kill(pid_t pid, int sig);
