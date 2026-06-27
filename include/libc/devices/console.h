@@ -42,6 +42,8 @@
 #define TTY_IOCTL_WM_SET_MODE       0x5428
 #define TTY_IOCTL_WM_GET_OWNER      0x5429
 
+#define TTY_IOCTL_SCROLL            0x5425
+
 #define TTY_WM_MODE_LEGACY          0u
 #define TTY_WM_MODE_EXTERNAL        1u
 
