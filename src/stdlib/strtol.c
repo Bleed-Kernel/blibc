@@ -10,6 +10,10 @@ static int char_to_digit(char c) {
     return -1;
 }
 
+static int is_space(char c){
+    return c == ' ' || c == '\t' || c == '\n' || c == '\v' || c == '\f' || c == '\r';
+}
+
 long strtol(const char *nptr, char **endptr, int base) {
     const char *s = nptr;
     int negative = 0;
@@ -76,4 +80,64 @@ long strtol(const char *nptr, char **endptr, int base) {
     }
 
     return (long)acc;
+}
+
+unsigned long strtoul(const char* str, char** endptr, int base){
+    const char* p = str;
+    unsigned long result = 0;
+    int negative = 0;
+    int any_digits = 0;
+
+    if (base < 0 || base == 1 || base > 36){
+        if (endptr){
+            *endptr = (char*)str;
+        }
+        return 0;
+    }
+
+    while (is_space(*p)){
+        p++;
+    }
+
+    if (*p == '+'){
+        p++;
+    }else if (*p == '-'){
+        negative = 1;
+        p++;
+    }
+
+    if ((base == 0 || base == 16) && p[0] == '0' && (p[1] == 'x' || p[1] == 'X')){
+        p += 2;
+        base = 16;
+    }else if (base == 0){
+        if (p[0] == '0'){
+            base = 8;
+        }else{
+            base = 10;
+        }
+    }
+
+    while (*p != '\0'){
+        int digit = char_to_digit(*p);
+        if (digit < 0 || digit >= base){
+            break;
+        }
+
+        result = result * (unsigned long)base + (unsigned long)digit;
+        any_digits = 1;
+        p++;
+    }
+
+    if (!any_digits){
+        if (endptr){
+            *endptr = (char*)str;
+        }
+        return 0;
+    }
+
+    if (endptr){
+        *endptr = (char*)p;
+    }
+
+    return negative ? (unsigned long)(-(long)result) : result;
 }
