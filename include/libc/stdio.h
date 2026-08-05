@@ -42,6 +42,7 @@ int putchar(int c);
 int puts(const char *s);
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 int snprintf(char *buf, size_t size, const char *fmt, ...);
+int sprintf(char *str, const char *fmt, ...);
 int sscanf(const char *str, const char *fmt, ...);
 char *fgets(char *s, int size, FILE *stream);
 void perror(const char *s);
