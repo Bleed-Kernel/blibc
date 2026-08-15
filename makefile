@@ -1,3 +1,6 @@
+UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
+
 ifeq ($(UNAME_S)$(UNAME_M),Darwinarm64)
 CC      := x86_64-elf-gcc
 AR      := x86_64-elf-ar
