@@ -1,6 +1,12 @@
+ifeq ($(UNAME_S)$(UNAME_M),Darwinarm64)
 CC      := x86_64-elf-gcc
 AR      := x86_64-elf-ar
 AS      := x86_64-elf-as
+else
+CC      := cc
+AR      := ar
+AS      := as
+endif
 
 SRC_DIR := src
 INC_DIR := include/libc
