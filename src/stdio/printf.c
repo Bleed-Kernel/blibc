@@ -10,9 +10,9 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <libc/stdio.h>
-#include <libc/syscalls/write.h>
-#include <vendor/nanoprintf.h>
+#include <stdio.h>
+#include <bleed/syscalls.h>
+#include "nanoprintf.h"
 
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {
     return npf_vsnprintf(buf, size, fmt, ap);

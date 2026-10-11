@@ -1,5 +1,5 @@
-#include <libc/stdio.h>
-#include <libc/syscalls/seek.h>
+#include <stdio.h>
+#include <bleed/syscalls.h>
 
 int fseek(FILE *stream, long offset, int whence) {
     long ret;

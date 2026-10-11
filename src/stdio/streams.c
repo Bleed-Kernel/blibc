@@ -1,5 +1,5 @@
-#include <libc/stdio.h>
-#include <libc/unistd.h>
+#include <stdio.h>
+#include <unistd.h>
 
 static unsigned char stdin_buffer[256];
 

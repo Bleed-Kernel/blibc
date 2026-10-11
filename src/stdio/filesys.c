@@ -1,7 +1,6 @@
-#include <libc/stdio.h>
-#include <libc/errno.h>
-#include <libc/syscalls/rename.h>
-#include <libc/syscalls/unlink.h>
+#include <stdio.h>
+#include <errno.h>
+#include <bleed/syscalls.h>
 
 int remove(const char *path) {
     if (!path) {

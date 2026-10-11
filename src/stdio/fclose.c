@@ -1,6 +1,6 @@
-#include <libc/stdio.h>
-#include <libc/stdlib.h>
-#include <libc/syscalls/close.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <bleed/syscalls.h>
 
 int fclose(FILE *stream) {
     if (!stream)

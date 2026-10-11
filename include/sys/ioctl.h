@@ -1,6 +1,3 @@
-#ifndef BLIBC_FORWARD_SYS_IOCTL_H
-#define BLIBC_FORWARD_SYS_IOCTL_H
+#pragma once
 
-#include <libc/sys/ioctl.h>
-
-#endif
+int ioctl(int fd, unsigned long request, void *arg);

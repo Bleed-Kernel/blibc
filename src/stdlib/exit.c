@@ -1,4 +1,4 @@
-#include <syscalls/exit.h>
+#include <bleed/syscalls.h>
 
 __attribute__((noreturn))
 void exit(int code){

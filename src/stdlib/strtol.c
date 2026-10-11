@@ -1,7 +1,7 @@
-#include <libc/stdlib.h>
-#include <libc/ctype.h>
-#include <libc/errno.h>
-#include <libc/limits.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
 
 static int char_to_digit(char c) {
     if (c >= '0' && c <= '9') return c - '0';

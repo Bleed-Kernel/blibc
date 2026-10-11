@@ -1,6 +1,8 @@
-#ifndef BLIBC_FORWARD_STDARG_H
-#define BLIBC_FORWARD_STDARG_H
+#pragma once
 
-#include <libc/stdarg.h>
+typedef __builtin_va_list va_list;
 
-#endif
+#define va_start(ap, last) __builtin_va_start(ap, last)
+#define va_arg(ap, type)   __builtin_va_arg(ap, type)
+#define va_end(ap)         __builtin_va_end(ap)
+#define va_copy(dest, src) __builtin_va_copy(dest, src)

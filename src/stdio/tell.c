@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include <libc/syscalls/seek.h>
-#include <libc/stdio.h>
+#include <bleed/syscalls.h>
+#include <stdio.h>
 
 long ftell(FILE *stream) {
     if (!stream) {

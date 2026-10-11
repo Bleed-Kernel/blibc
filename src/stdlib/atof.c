@@ -1,5 +1,5 @@
-#include <libc/ctype.h>
-#include <libc/stdlib.h>
+#include <ctype.h>
+#include <stdlib.h>
 
 double atof(const char *s) {
     double value = 0.0;

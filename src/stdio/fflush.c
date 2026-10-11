@@ -1,4 +1,4 @@
-#include <libc/stdio.h>
+#include <stdio.h>
 
 int fflush(FILE *stream) {
     if (!stream)

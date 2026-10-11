@@ -12,7 +12,7 @@ AS      := as
 endif
 
 SRC_DIR := src
-INC_DIR := include/libc
+INC_DIR := include
 BUILD   := build
 SYSROOT := sysroot
 
@@ -28,8 +28,7 @@ CFLAGS  := \
 	-fno-pic \
 	-fno-pie \
 	-nostdinc \
-	-Iinclude \
-	-Iinclude/libc \
+	-I$(INC_DIR) \
 	-Wall -Wextra \
 	-std=gnu11 \
 	-O2 \
@@ -41,21 +40,23 @@ OBJS := \
 	$(C_SRCS:$(SRC_DIR)/%.c=$(BUILD)/%.o) \
 	$(S_SRCS:$(SRC_DIR)/%.S=$(BUILD)/%.o)
 
-START_SRC := $(firstword $(filter %/start.S,$(S_SRCS)))
-START     := $(START_SRC:$(SRC_DIR)/%.S=$(BUILD)/%.o)
+START := $(BUILD)/start.o
 
 .PHONY: all sysroot clean
 
 all: sysroot
 
+# the sysroot is rebuilt from scratch so headers removed from include/ don't linger
 sysroot: $(LIBC_A)
+	rm -rf $(SYSROOT)
 	@mkdir -p $(LIB_DIR)
 	@mkdir -p $(INC_OUT)
 	cp $(LIBC_A) $(LIB_DIR)/
 	cp $(START) $(LIB_DIR)/
-	cp -r include/* $(INC_OUT)/
+	cp -r $(INC_DIR)/* $(INC_OUT)/
 
 $(LIBC_A): $(OBJS)
+	rm -f $@
 	$(AR) rcs $@ $^
 
 $(BUILD)/%.o: $(SRC_DIR)/%.c

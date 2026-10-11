@@ -1,5 +1,5 @@
-#include <libc/errno.h>
-#include <libc/stdlib.h>
+#include <errno.h>
+#include <stdlib.h>
 
 // stub
 int system(const char *command) {

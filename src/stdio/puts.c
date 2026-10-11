@@ -1,6 +1,6 @@
-#include <libc/stdio.h>
-#include <libc/string.h>
-#include <libc/unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 static int write_all(int fd, const char *buf, size_t len) {
     size_t off = 0;

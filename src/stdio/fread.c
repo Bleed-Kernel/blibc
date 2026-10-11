@@ -1,8 +1,7 @@
-#include <libc/stdio.h>
-#include <libc/stdlib.h>
-#include <libc/syscalls/read.h>
-#include <libc/syscalls/close.h>
-#include <libc/fs/file.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <bleed/syscalls.h>
+#include <fcntl.h>
 
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
     if (!stream || !(stream->flags & FILE_READ))

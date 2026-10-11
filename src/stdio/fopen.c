@@ -1,8 +1,7 @@
-#include <libc/stdio.h>
-#include <libc/stdlib.h>
-#include <libc/syscalls/open.h>
-#include <libc/syscalls/close.h>
-#include <libc/fs/file.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <bleed/syscalls.h>
+#include <fcntl.h>
 
 #define DEFAULT_BUFSIZE 4096
 
