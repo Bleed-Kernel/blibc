@@ -61,6 +61,7 @@ typedef struct {
     uint64_t buffer;
     uint32_t top;
     uint32_t bottom;
+    uint32_t pitch;
 } tty_grab_t;
 
 #define TTY_WM_MODE_LEGACY          0u
