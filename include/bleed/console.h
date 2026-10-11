@@ -44,6 +44,25 @@
 
 #define TTY_IOCTL_SCROLL            0x5425
 
+// offscreen ttys, the same terminal as tty0 but drawing into memory for a window to show.
+#define TTY_IOCTL_DESTROY           0x5430
+#define TTY_IOCTL_GRAB              0x5431
+#define TTY_IOCTL_RESIZE            0x5432  // tty_create_t again, new size in and the index left alone
+
+// size in pixels going in, which /dev/ttyN it became coming out
+typedef struct {
+    uint32_t width;
+    uint32_t height;
+    uint32_t index;
+} tty_create_t;
+
+// buffer is a whole width by height of pixels. only the rows that changed 
+typedef struct {
+    uint64_t buffer;
+    uint32_t top;
+    uint32_t bottom;
+} tty_grab_t;
+
 #define TTY_WM_MODE_LEGACY          0u
 #define TTY_WM_MODE_EXTERNAL        1u
 
