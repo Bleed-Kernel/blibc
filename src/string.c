@@ -5,18 +5,51 @@
 #include <strings.h>
 #include <stddef.h>
 
+#define MEM_VEC __attribute__((noinline, target("sse2"), \
+                               optimize("-ftree-vectorize", "-fvect-cost-model=dynamic", \
+                                        "-fno-tree-loop-distribute-patterns")))
+
+MEM_VEC static void copy_fwd_vec(uint8_t *dest, const uint8_t *src, size_t n) {
+    for (size_t i = 0; i < n; i++)
+        dest[i] = src[i];
+}
+
+MEM_VEC static void copy_back_vec(uint8_t *dest, const uint8_t *src, size_t n) {
+    while (n >= 16) {
+        uint8_t block[16];
+
+        n -= 16;
+        __builtin_memcpy(block, src + n, 16);
+        __builtin_memcpy(dest + n, block, 16);
+    }
+    while (n > 0) {
+        n--;
+        dest[n] = src[n];
+    }
+}
+
+MEM_VEC static void fill_vec(uint8_t *dest, uint8_t c, size_t n) {
+    for (size_t i = 0; i < n; i++)
+        dest[i] = c;
+}
+
+#define MEMCMP_BLOCK 64
+
+// non zero if the two differ anywhere in n bytes. no early exit, thats what lets it vectorise
+MEM_VEC static uint8_t diff_vec(const uint8_t *a, const uint8_t *b, size_t n) {
+    uint8_t diff = 0;
+    for (size_t i = 0; i < n; i++)
+        diff |= a[i] ^ b[i];
+    return diff;
+}
+
 /// @brief set memory at destination
 /// @param s destination
 /// @param c byte value
 /// @param n size
 /// @return s
 void *memset(void *s, int c, size_t n) {
-    uint8_t *p = (uint8_t *)s;
-
-    for (size_t i = 0; i < n; i++) {
-        p[i] = (uint8_t)c;
-    }
-
+    fill_vec((uint8_t *)s, (uint8_t)c, n);
     return s;
 }
 
@@ -26,13 +59,7 @@ void *memset(void *s, int c, size_t n) {
 /// @param n size
 /// @return dest
 void *memcpy(void *restrict dest, const void *restrict src, size_t n) {
-    uint8_t *restrict pdest = (uint8_t *restrict)dest;
-    const uint8_t *restrict psrc = (const uint8_t *restrict)src;
-
-    for (size_t i = 0; i < n; i++) {
-        pdest[i] = psrc[i];
-    }
-
+    copy_fwd_vec((uint8_t *)dest, (const uint8_t *)src, n);
     return dest;
 }
 
@@ -46,15 +73,11 @@ void *memmove(void *dest, const void *src, size_t n) {
     uint8_t *pdest = (uint8_t *)dest;
     const uint8_t *psrc = (const uint8_t *)src;
 
-    if (src > dest) {
-        for (size_t i = 0; i < n; i++) {
-            pdest[i] = psrc[i];
-        }
-    } else if (src < dest) {
-        for (size_t i = n; i > 0; i--) {
-            pdest[i-1] = psrc[i-1];
-        }
-    }
+    // going forwards is only wrong when dest starts inside src
+    if (pdest <= psrc || pdest >= psrc + n)
+        copy_fwd_vec(pdest, psrc, n);
+    else
+        copy_back_vec(pdest, psrc, n);
 
     return dest;
 }
@@ -67,6 +90,12 @@ void *memmove(void *dest, const void *src, size_t n) {
 int memcmp(const void *s1, const void *s2, size_t n) {
     const uint8_t *p1 = (const uint8_t *)s1;
     const uint8_t *p2 = (const uint8_t *)s2;
+
+    while (n >= MEMCMP_BLOCK && !diff_vec(p1, p2, MEMCMP_BLOCK)) {
+        p1 += MEMCMP_BLOCK;
+        p2 += MEMCMP_BLOCK;
+        n  -= MEMCMP_BLOCK;
+    }
 
     for (size_t i = 0; i < n; i++) {
         if (p1[i] != p2[i]) {
