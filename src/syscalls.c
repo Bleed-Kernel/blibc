@@ -446,6 +446,21 @@ uint64_t _taskinfo(uint64_t pid, user_task_info_t *info){
     return syscall_taskinfo(pid, info);
 }
 
+static inline long syscall_taskusage(uint64_t pid, user_task_usage_t *usage) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_TASKUSAGE), "D"(pid), "S"(usage)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _taskusage(uint64_t pid, user_task_usage_t *usage){
+    return syscall_taskusage(pid, usage);
+}
+
 static inline int syscall_time(rtc_time_t *buf) {
     int ret;
     asm volatile(

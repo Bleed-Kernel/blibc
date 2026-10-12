@@ -53,6 +53,7 @@ enum {
     SYS_MAPFB           = 519,
     SYS_IPC_SEND        = 520,
     SYS_IPC_RECV        = 521,
+    SYS_TASKUSAGE       = 525,
 };
 
 struct stat;
@@ -98,6 +99,7 @@ long _kill(long pid, long sig);
 void _yeild();
 uint64_t _taskcount(void);
 uint64_t _taskinfo(uint64_t pid, user_task_info_t *info);
+long _taskusage(uint64_t pid, user_task_usage_t *usage);
 
 // signals
 long _sigaction(int sig, const sigaction_t *act, sigaction_t *oldact);
