@@ -1,15 +1,8 @@
-UNAME_S := $(shell uname -s)
-UNAME_M := $(shell uname -m)
-
-ifeq ($(UNAME_S)$(UNAME_M),Darwinarm64)
+# always the cross toolchain, the user programs link with x86_64-elf-gcc and a host cc
+# built libc mixed in makes ld warn about .note.GNU-stack on every program
 CC      := x86_64-elf-gcc
 AR      := x86_64-elf-ar
 AS      := x86_64-elf-as
-else
-CC      := cc
-AR      := ar
-AS      := as
-endif
 
 SRC_DIR := src
 INC_DIR := include
