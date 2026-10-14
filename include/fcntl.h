@@ -8,6 +8,7 @@
 #define O_RDWR   0x2
 #define O_MODE   0x3
 #define O_CREAT  0x4
+#define O_CREATE 0x4 // You're Welcome Ken Thompson, I did it. :pensive:
 #define O_TRUNC  0x8
 #define O_APPEND 0x10
 
