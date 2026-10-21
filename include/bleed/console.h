@@ -48,6 +48,7 @@
 #define TTY_IOCTL_DESTROY           0x5430
 #define TTY_IOCTL_GRAB              0x5431
 #define TTY_IOCTL_RESIZE            0x5432  // tty_create_t again, new size in and the index left alone
+#define TTY_IOCTL_GRAB_TEXT         0x5433  // Same as grab but this is pixels
 
 // size in pixels going in, which /dev/ttyN it became coming out
 typedef struct {
@@ -63,6 +64,28 @@ typedef struct {
     uint32_t bottom;
     uint32_t pitch;
 } tty_grab_t;
+
+// one character as the tty has it, cp 0 means nothing was ever put there
+typedef struct {
+    uint32_t cp;
+    uint32_t fg;
+    uint32_t bg;
+} tty_cell_t;
+
+// cells is room for max_rows rows of tty_cell_t, stride apart, laid out like the screen. only the
+// rows that changed since the last grab get written, top to bottom says which (both 0 for none).
+typedef struct {
+    uint64_t cells;
+    uint32_t stride;
+    uint32_t max_rows;
+    uint32_t cols;
+    uint32_t rows;
+    uint32_t top;
+    uint32_t bottom;
+    uint32_t bg;
+    uint32_t cell_w;
+    uint32_t cell_h;
+} tty_text_grab_t;
 
 #define TTY_WM_MODE_LEGACY          0u
 #define TTY_WM_MODE_EXTERNAL        1u
