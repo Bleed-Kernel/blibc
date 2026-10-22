@@ -143,13 +143,88 @@ double acos(double x) {
     return atan2(sqrt(1.0 - x * x), x);
 }
 
+// y * log2(x), then 2 to the whole part and the fraction apart, f2xm1 only takes -1 to 1
+static double pow_x87(double x, double y) {
+    double result;
+    __asm__ __volatile__ (
+        "fldl %2            \n\t"
+        "fldl %1            \n\t"
+        "fyl2x              \n\t"
+        "fld %%st(0)        \n\t"
+        "frndint            \n\t"
+        "fxch               \n\t"
+        "fsub %%st(1), %%st \n\t"
+        "f2xm1              \n\t"
+        "fld1               \n\t"
+        "faddp              \n\t"
+        "fscale             \n\t"
+        "fstp %%st(1)       \n\t"
+        "fstpl %0"
+        : "=m"(result)
+        : "m"(x), "m"(y)
+    );
+    return result;
+}
+
+// e^x is 2^(x * log2 e), same split as pow
+double exp(double x) {
+    double result;
+    __asm__ __volatile__ (
+        "fldl %1            \n\t"
+        "fldl2e             \n\t"
+        "fmulp              \n\t"
+        "fld %%st(0)        \n\t"
+        "frndint            \n\t"
+        "fxch               \n\t"
+        "fsub %%st(1), %%st \n\t"
+        "f2xm1              \n\t"
+        "fld1               \n\t"
+        "faddp              \n\t"
+        "fscale             \n\t"
+        "fstp %%st(1)       \n\t"
+        "fstpl %0"
+        : "=m"(result)
+        : "m"(x)
+    );
+    return result;
+}
+
+double log(double x) {
+    double result;
+    __asm__ __volatile__ (
+        "fldln2     \n\t"
+        "fldl %1    \n\t"
+        "fyl2x      \n\t"
+        "fstpl %0"
+        : "=m"(result)
+        : "m"(x)
+    );
+    return result;
+}
+
+double log10(double x) {
+    double result;
+    __asm__ __volatile__ (
+        "fldlg2     \n\t"
+        "fldl %1    \n\t"
+        "fyl2x      \n\t"
+        "fstpl %0"
+        : "=m"(result)
+        : "m"(x)
+    );
+    return result;
+}
+
 double pow(double x, double y) {
     int n = (int)y;
     int negate_exp = 0;
     double result = 1.0;
 
-    if ((double)n != y)
-        return 1.0;
+    if ((double)n != y) {
+        if (x > 0.0)
+            return pow_x87(x, y);
+        return 0.0;
+    }
 
     if (n < 0)
     {

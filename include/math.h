@@ -12,3 +12,6 @@ double atan(double x);
 double atan2(double y, double x);
 double acos(double x);
 double pow(double x, double y);
+double exp(double x);
+double log(double x);
+double log10(double x);

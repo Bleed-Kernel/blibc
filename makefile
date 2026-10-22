@@ -35,18 +35,25 @@ OBJS := \
 
 START := $(BUILD)/start.o
 
+HEADERS := $(shell find $(INC_DIR) -type f)
+SYSROOT_STAMP := $(SYSROOT)/.stamp
+
 .PHONY: all sysroot clean
 
 all: sysroot
 
-# the sysroot is rebuilt from scratch so headers removed from include/ don't linger
-sysroot: $(LIBC_A)
-	rm -rf $(SYSROOT)
-	@mkdir -p $(LIB_DIR)
-	@mkdir -p $(INC_OUT)
-	cp $(LIBC_A) $(LIB_DIR)/
-	cp $(START) $(LIB_DIR)/
-	cp -r $(INC_DIR)/* $(INC_OUT)/
+sysroot: $(SYSROOT_STAMP)
+
+# rebuilt from scratch so headers removed from include/ don't linger, but only when something
+# changed, and built off to the side then swapped in. programs building at the same time all
+# call this and copy out of it, an rm -rf under them was what broke parallel builds
+$(SYSROOT_STAMP): $(LIBC_A) $(START) $(HEADERS)
+	@rm -rf $(SYSROOT).tmp
+	@mkdir -p $(SYSROOT).tmp/lib $(SYSROOT).tmp/include
+	cp $(LIBC_A) $(START) $(SYSROOT).tmp/lib/
+	cp -r $(INC_DIR)/* $(SYSROOT).tmp/include/
+	@touch $(SYSROOT).tmp/.stamp
+	@rm -rf $(SYSROOT) && mv $(SYSROOT).tmp $(SYSROOT)
 
 $(LIBC_A): $(OBJS)
 	rm -f $@
@@ -63,4 +70,4 @@ $(BUILD)/%.o: $(SRC_DIR)/%.S
 clean:
 	rm -rf $(BUILD)
 	rm -rf $(LIBC_A)
-	rm -rf $(SYSROOT)
+	rm -rf $(SYSROOT) $(SYSROOT).tmp

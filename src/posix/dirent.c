@@ -48,11 +48,11 @@ struct dirent *readdir(DIR *dirp) {
     }
 
     ret = _readdir(dirp->fd, (size_t)dirp->index, &raw);
+    if (ret == -ENOENT) return NULL;
     if (ret < 0) {
         posix_errno_from_ret(ret);
         return NULL;
     }
-    if (ret == 0) return NULL;
 
     dirp->index++;
     dirp->entry.d_ino = (ino_t)dirp->index;

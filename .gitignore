@@ -4,3 +4,4 @@ blibc.a
 
 
 .vscode/settings.json
+sysroot.tmp/
