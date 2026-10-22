@@ -113,32 +113,85 @@ static int parse_float(const char *s, int width, double *out, int *consumed) {
     return 1;
 }
 
-int sscanf(const char *str, const char *fmt, ...) {
-    va_list ap;
-    int assigned = 0;
-    const char *s = str;
-    const char *f = fmt;
+// where the text comes from. a string is read in place
+typedef struct {
+    const char *s;
+    FILE       *f;
+    int         used;
+    char        tok[256];
+} src_t;
 
-    va_start(ap, fmt);
+static int src_peek(src_t *in) {
+    if (!in->f)
+        return *in->s ? (unsigned char)*in->s : EOF;
+    int c = fgetc(in->f);
+    if (c != EOF)
+        ungetc(c, in->f);
+    return c;
+}
+
+static void src_take(src_t *in) {
+    if (in->f) fgetc(in->f);
+    else in->s++;
+    in->used++;
+}
+
+static void src_skip_space(src_t *in) {
+    int c;
+    while ((c = src_peek(in)) != EOF && isspace(c))
+        src_take(in);
+}
+
+static const char *src_field(src_t *in, int width) {
+    if (!in->f)
+        return in->s;
+
+    int max = (int)sizeof(in->tok) - 1;
+    if (width > 0 && width < max)
+        max = width;
+
+    int n = 0, c;
+    while (n < max && (c = fgetc(in->f)) != EOF) {
+        if (!isalnum(c) && c != '+' && c != '-' && c != '.') {
+            ungetc(c, in->f);
+            break;
+        }
+        in->tok[n++] = (char)c;
+    }
+    in->tok[n] = '\0';
+    return in->tok;
+}
+
+static void src_used(src_t *in, int consumed) {
+    if (!in->f)
+        in->s += consumed;
+    in->used += consumed;
+}
+
+static int scan(src_t *in, const char *fmt, va_list ap) {
+    int assigned = 0;
+    int matched_any = 0;
+    const char *f = fmt;
 
     while (*f) {
         if (isspace((unsigned char)*f)) {
             while (isspace((unsigned char)*f)) f++;
-            while (isspace((unsigned char)*s)) s++;
+            src_skip_space(in);
             continue;
         }
 
         if (*f != '%') {
-            if (*s != *f) break;
-            s++;
+            if (src_peek(in) != (unsigned char)*f) break;
+            src_take(in);
             f++;
             continue;
         }
 
         f++;
         if (*f == '%') {
-            if (*s != '%') break;
-            s++;
+            src_skip_space(in);
+            if (src_peek(in) != '%') break;
+            src_take(in);
             f++;
             continue;
         }
@@ -146,6 +199,7 @@ int sscanf(const char *str, const char *fmt, ...) {
         int suppress = 0;
         int width = 0;
         int long_mod = 0;
+        int short_mod = 0;
         char conv;
 
         if (*f == '*') {
@@ -158,23 +212,34 @@ int sscanf(const char *str, const char *fmt, ...) {
             f++;
         }
 
-        while (*f == 'h' || *f == 'l' || *f == 'L') {
-            if (*f == 'l') long_mod++;
+        while (*f == 'h' || *f == 'l' || *f == 'L' || *f == 'z' || *f == 'j' || *f == 't') {
+            if (*f == 'h') short_mod++;
+            else long_mod++;
             f++;
         }
 
         conv = *f++;
         if (conv == '\0') break;
 
-        if (conv != 'c' && conv != '[') {
-            while (isspace((unsigned char)*s)) s++;
+        if (conv == 'n') {
+            if (!suppress) *va_arg(ap, int *) = in->used;
+            continue;
         }
 
-        if (conv == 'd' || conv == 'u' || conv == 'x' || conv == 'X' || conv == 'o' || conv == 'i') {
+        if (conv != 'c' && conv != '[') {
+            src_skip_space(in);
+        }
+        if (src_peek(in) == EOF) {
+            if (!matched_any) return -1;
+            break;
+        }
+
+        if (conv == 'd' || conv == 'u' || conv == 'x' || conv == 'X' || conv == 'o' || conv == 'i' || conv == 'p') {
             int base = 10;
             int consumed = 0;
+            const char *s = src_field(in, width);
 
-            if (conv == 'x' || conv == 'X') base = 16;
+            if (conv == 'x' || conv == 'X' || conv == 'p') base = 16;
             else if (conv == 'o') base = 8;
 
             if (conv == 'i') {
@@ -186,83 +251,131 @@ int sscanf(const char *str, const char *fmt, ...) {
                 }
             }
 
-            if (conv == 'd') {
-                long v;
-                if (!parse_int(s, 10, width, &v, &consumed)) break;
-                if (!suppress) {
-                    if (long_mod > 0) *va_arg(ap, long *) = v;
-                    else *va_arg(ap, int *) = (int)v;
-                    assigned++;
-                }
-            } else if (conv == 'u' || conv == 'x' || conv == 'X' || conv == 'o') {
-                unsigned long v;
-                if (!parse_uint(s, base, width, &v, &consumed)) break;
-                if (!suppress) {
-                    if (long_mod > 0) *va_arg(ap, unsigned long *) = v;
-                    else *va_arg(ap, unsigned int *) = (unsigned int)v;
-                    assigned++;
-                }
-            } else {
+            if (conv == 'd' || conv == 'i') {
                 long v;
                 if (!parse_int(s, base, width, &v, &consumed)) break;
                 if (!suppress) {
                     if (long_mod > 0) *va_arg(ap, long *) = v;
+                    else if (short_mod == 1) *va_arg(ap, short *) = (short)v;
+                    else if (short_mod > 1) *va_arg(ap, signed char *) = (signed char)v;
                     else *va_arg(ap, int *) = (int)v;
+                    assigned++;
+                }
+            } else {
+                unsigned long v;
+                if (!parse_uint(s, base, width, &v, &consumed)) break;
+                if (!suppress) {
+                    if (conv == 'p') *va_arg(ap, void **) = (void *)v;
+                    else if (long_mod > 0) *va_arg(ap, unsigned long *) = v;
+                    else if (short_mod == 1) *va_arg(ap, unsigned short *) = (unsigned short)v;
+                    else if (short_mod > 1) *va_arg(ap, unsigned char *) = (unsigned char)v;
+                    else *va_arg(ap, unsigned int *) = (unsigned int)v;
                     assigned++;
                 }
             }
 
-            s += consumed;
+            src_used(in, consumed);
+            matched_any = 1;
             continue;
         }
 
-        if (conv == 'f' || conv == 'e' || conv == 'E' || conv == 'g' || conv == 'G') {
+        if (conv == 'f' || conv == 'e' || conv == 'E' || conv == 'g' || conv == 'G' || conv == 'a') {
             double dv;
             int consumed = 0;
-            if (!parse_float(s, width, &dv, &consumed)) break;
+            if (!parse_float(src_field(in, width), width, &dv, &consumed)) break;
             if (!suppress) {
                 if (long_mod > 0) *va_arg(ap, double *) = dv;
                 else *va_arg(ap, float *) = (float)dv;
                 assigned++;
             }
-            s += consumed;
+            src_used(in, consumed);
+            matched_any = 1;
             continue;
         }
 
-        if (conv == 's') {
-            int n = 0;
-            char *out = suppress ? NULL : va_arg(ap, char *);
+        if (conv == 's' || conv == 'c' || conv == '[') {
+            char set[256] = {0};
+            int  invert = 0;
+            if (conv == '[') {
+                if (*f == '^') {
+                    invert = 1;
+                    f++;
+                }
+                if (*f == ']') {
+                    set[']'] = 1;
+                    f++;
+                }
+                while (*f && *f != ']') {
+                    if (f[1] == '-' && f[2] && f[2] != ']') {
+                        for (int ch = (unsigned char)f[0]; ch <= (unsigned char)f[2]; ch++)
+                            set[ch] = 1;
+                        f += 3;
+                    } else {
+                        set[(unsigned char)*f++] = 1;
+                    }
+                }
+                if (*f == ']') f++;
+            }
 
-            while (*s && !isspace((unsigned char)*s) && (width == 0 || n < width)) {
-                if (!suppress) out[n] = *s;
-                s++;
+            int limit = width > 0 ? width : (conv == 'c' ? 1 : 0);
+            char *out = suppress ? NULL : va_arg(ap, char *);
+            int n = 0, c;
+
+            while ((limit == 0 || n < limit) && (c = src_peek(in)) != EOF) {
+                if (conv == 's' && isspace(c)) break;
+                if (conv == '[' && set[c] == invert) break;
+                if (out) out[n] = (char)c;
+                src_take(in);
                 n++;
             }
-            if (n == 0) break;
-            if (!suppress) {
-                out[n] = '\0';
+
+            if (n == 0 || (conv == 'c' && n < limit)) break;
+            if (out) {
+                if (conv != 'c') out[n] = '\0';
                 assigned++;
             }
-            continue;
-        }
-
-        if (conv == 'c') {
-            int n = (width > 0) ? width : 1;
-            char *out = suppress ? NULL : va_arg(ap, char *);
-            for (int i = 0; i < n; i++) {
-                if (*s == '\0') goto done;
-                if (!suppress) out[i] = *s;
-                s++;
-            }
-            if (!suppress) assigned++;
+            matched_any = 1;
             continue;
         }
 
         break;
     }
 
-done:
-    va_end(ap);
-    if (assigned == 0 && *s == '\0') return -1;
     return assigned;
+}
+
+int vsscanf(const char *str, const char *fmt, va_list ap) {
+    src_t in = { .s = str };
+    return scan(&in, fmt, ap);
+}
+
+int sscanf(const char *str, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int r = vsscanf(str, fmt, ap);
+    va_end(ap);
+    return r;
+}
+
+int vfscanf(FILE *stream, const char *fmt, va_list ap) {
+    if (!stream)
+        return -1;
+    src_t in = { .f = stream };
+    return scan(&in, fmt, ap);
+}
+
+int fscanf(FILE *stream, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int r = vfscanf(stream, fmt, ap);
+    va_end(ap);
+    return r;
+}
+
+int scanf(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int r = vfscanf(stdin, fmt, ap);
+    va_end(ap);
+    return r;
 }

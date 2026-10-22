@@ -89,6 +89,13 @@ char *strrchr(const char *s, int c);
 char *strstr(const char *haystack, const char *needle);
 
 char *strerror(int errnum);
+void *memchr(const void *s, int c, size_t n);
+void *memrchr(const void *s, int c, size_t n);
+size_t strnlen(const char *s, size_t max);
+size_t strspn(const char *s, const char *accept);
+size_t strcspn(const char *s, const char *reject);
+char *strpbrk(const char *s, const char *accept);
+int strcoll(const char *s1, const char *s2);
 
 /// @brief tokenize a string (non-thread-safe)
 /// @param s string or NULL to continue

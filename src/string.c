@@ -294,13 +294,12 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 /// @param c character
 /// @return pointer to char or NULL
 char *strchr(const char *s, int c) {
-    while (*s != '\0') {
-        if (*s == (char)c) {
+    for (;; s++) {
+        if (*s == (char)c)
             return (char *)s;
-        }
-        s++;
+        if (*s == '\0')
+            return NULL;
     }
-    return NULL;
 }
 
 /// @brief string concatonation of a size

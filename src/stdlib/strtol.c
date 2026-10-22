@@ -141,3 +141,20 @@ unsigned long strtoul(const char* str, char** endptr, int base){
 
     return negative ? (unsigned long)(-(long)result) : result;
 }
+
+// long and long long are both 64 bits here
+long long strtoll(const char *nptr, char **endptr, int base) {
+    return strtol(nptr, endptr, base);
+}
+
+unsigned long long strtoull(const char *nptr, char **endptr, int base) {
+    return strtoul(nptr, endptr, base);
+}
+
+long atol(const char *s) {
+    return strtol(s, NULL, 10);
+}
+
+long long atoll(const char *s) {
+    return strtol(s, NULL, 10);
+}

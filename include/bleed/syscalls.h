@@ -17,6 +17,7 @@ enum {
     SYS_OPEN            = 2,
     SYS_CLOSE           = 3,
     SYS_STAT            = 4,
+    SYS_POLL            = 7,
     SYS_SEEK            = 8,
     SYS_MMAP            = 9,
     SYS_MUNMAP          = 11,
@@ -78,6 +79,8 @@ int _close(int fd);
 long _read(int fd, void *buf, unsigned long len);
 long _write(int fd, const void *buf, long len);
 long _seek(int fd, long offset, int whence);
+struct pollfd;
+long _poll(struct pollfd *fds, unsigned long nfds, long timeout_ms);
 int _ioctl(int fd, unsigned long request, void* arg);
 long _dup2(int oldfd, int newfd);
 long _pipe(int fds[2]);

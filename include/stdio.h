@@ -3,6 +3,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <sys/types.h>
 
 #define SEEK_SET 0
 #define SEEK_CUR 1
@@ -44,7 +45,25 @@ int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
 int snprintf(char *buf, size_t size, const char *fmt, ...);
 int sprintf(char *str, const char *fmt, ...);
 int sscanf(const char *str, const char *fmt, ...);
+int vsscanf(const char *str, const char *fmt, va_list ap);
+int fscanf(FILE *stream, const char *fmt, ...);
+int vfscanf(FILE *stream, const char *fmt, va_list ap);
+int scanf(const char *fmt, ...);
 char *fgets(char *s, int size, FILE *stream);
+int fgetc(FILE *stream);
+int getc(FILE *stream);
+int getchar(void);
+int ungetc(int c, FILE *stream);
+int fputc(int c, FILE *stream);
+int putc(int c, FILE *stream);
+int fputs(const char *s, FILE *stream);
+ssize_t getline(char **line, size_t *cap, FILE *stream);
+ssize_t getdelim(char **line, size_t *cap, int delim, FILE *stream);
+int feof(FILE *stream);
+int ferror(FILE *stream);
+void clearerr(FILE *stream);
+int fileno(FILE *stream);
+void rewind(FILE *stream);
 void perror(const char *s);
 
 FILE *fopen(const char *path, const char *mode);

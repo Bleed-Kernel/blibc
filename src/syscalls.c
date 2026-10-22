@@ -534,3 +534,18 @@ static inline void syscall_yield() {
 void _yeild(){
     syscall_yield();
 }
+
+static inline long syscall_poll(struct pollfd *fds, unsigned long nfds, long timeout_ms) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_POLL), "D"(fds), "S"(nfds), "d"(timeout_ms)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _poll(struct pollfd *fds, unsigned long nfds, long timeout_ms) {
+    return syscall_poll(fds, nfds, timeout_ms);
+}

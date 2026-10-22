@@ -15,6 +15,10 @@ int dup2(int oldfd, int newfd);
 int pipe(int fds[2]);
 off_t lseek(int fd, off_t offset, int whence);
 int chdir(const char *path);
+int unlink(const char *path);
+int rmdir(const char *path);
+unsigned int sleep(unsigned int seconds);
+int usleep(unsigned long usec);
 char *getcwd(char *buf, size_t size);
 int isatty(int fd);
 pid_t getpid(void);
@@ -32,3 +36,7 @@ int ipc_send(pid_t target_pid, void *addr, size_t pages);
 int ipc_recv(ipc_message_t *msg);
 
 extern char **environ;
+
+int getopt(int argc, char *const argv[], const char *optstring);
+extern char *optarg;
+extern int optind, opterr, optopt;
