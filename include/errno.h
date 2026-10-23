@@ -35,4 +35,7 @@ extern int errno;
 #define EPIPE           32
 #define EDOM            33
 #define ERANGE          34
+#define EDEADLK         35
+#define ENAMETOOLONG    36
+#define ENOLCK          37
 #define ENOSYS          38

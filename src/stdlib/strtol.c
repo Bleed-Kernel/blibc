@@ -2,6 +2,7 @@
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <inttypes.h>
 
 static int char_to_digit(char c) {
     if (c >= '0' && c <= '9') return c - '0';
@@ -157,4 +158,12 @@ long atol(const char *s) {
 
 long long atoll(const char *s) {
     return strtol(s, NULL, 10);
+}
+
+intmax_t strtoimax(const char *nptr, char **endptr, int base) {
+    return strtol(nptr, endptr, base);
+}
+
+uintmax_t strtoumax(const char *nptr, char **endptr, int base) {
+    return strtoul(nptr, endptr, base);
 }

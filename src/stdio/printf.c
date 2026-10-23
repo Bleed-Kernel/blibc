@@ -6,12 +6,16 @@
 #define NANOPRINTF_USE_BINARY_FORMAT_SPECIFIERS          1
 #define NANOPRINTF_USE_WRITEBACK_FORMAT_SPECIFIERS       1
 #define NANOPRINTF_USE_FLOAT_FORMAT_SPECIFIERS           1
+#define NANOPRINTF_USE_ALT_FORM_FLAG                     1
+#define NANOPRINTF_CONVERSION_BUFFER_SIZE                1100
+#define NPF_BLEED_FLOATFMT                               1
 
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <bleed/syscalls.h>
+#include "floatfmt.h"
 #include "nanoprintf.h"
 
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap) {

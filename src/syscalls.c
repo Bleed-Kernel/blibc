@@ -401,6 +401,23 @@ long _stat(const char *path, struct stat *st) {
     return syscall_stat(path, st);
 }
 
+static inline long syscall_fstat(int fd, struct stat *st) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_FSTAT),
+          "D"((long)fd),
+          "S"(st)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _fstat(int fd, struct stat *st) {
+    return syscall_fstat(fd, st);
+}
+
 static inline int syscall_meminfo(system_memory_info_t *buf) {
     int ret;
     asm volatile(

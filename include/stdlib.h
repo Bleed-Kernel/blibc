@@ -45,6 +45,7 @@ void *bsearch(const void *key, const void *base, size_t nmemb, size_t size,
 int system(const char *command);
 
 char *getenv(const char *name);
+char *realpath(const char *path, char *resolved);
 int putenv(char *string);
 int setenv(const char *name, const char *value, int overwrite);
 int unsetenv(const char *name);

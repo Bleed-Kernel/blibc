@@ -33,15 +33,20 @@ struct stat {
     dev_t     st_dev;
     ino_t     st_ino;
     mode_t    st_mode;
-    nlink_t   st_nlink;
     uid_t     st_uid;
     gid_t     st_gid;
+    unsigned int st_pad;
+    nlink_t   st_nlink;
     dev_t     st_rdev;
     off_t     st_size;
+    long      st_blksize;
+    long      st_blocks;
     time_t    st_atime;
     time_t    st_mtime;
     time_t    st_ctime;
 };
 
 int stat(const char *path, struct stat *st);
+int lstat(const char *path, struct stat *st);
+int fstat(int fd, struct stat *st);
 int mkdir(const char *path, mode_t mode);

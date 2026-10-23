@@ -4,11 +4,21 @@
 
 #include "compat_errno.h"
 
-// the kernel is yet to make use of a full stat but i do intend on it soon just like adding
-// vfs stuff for making files from userspace this is basically a stub for comptablilty for now
-
 int stat(const char *path, struct stat *st) {
     long ret = _stat(path, st);
+    if (ret < 0) {
+        return (int)posix_errno_from_ret(ret);
+    }
+    return 0;
+}
+
+// theres no links to not follow
+int lstat(const char *path, struct stat *st) {
+    return stat(path, st);
+}
+
+int fstat(int fd, struct stat *st) {
+    long ret = _fstat(fd, st);
     if (ret < 0) {
         return (int)posix_errno_from_ret(ret);
     }

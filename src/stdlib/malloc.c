@@ -4,11 +4,14 @@
 
 #define PAGE_SIZE 4096
 
+// 32 bytes and 16 aligned, so whats handed out after it is 16 aligned like the x86_64 abi
 typedef struct block {
     size_t size;
-    int free;
     struct block* next;
-} block_t;
+    int free;
+} __attribute__((aligned(16))) block_t;
+
+_Static_assert(sizeof(block_t) % 16 == 0, "malloc header has to keep pointers 16 aligned");
 
 static block_t* heap_head = NULL;
 static block_t* heap_tail = NULL;

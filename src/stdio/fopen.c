@@ -71,3 +71,30 @@ FILE *fopen(const char *path, const char *mode) {
 
     return f;
 }
+
+// a FILE over an fd thats already open, the mode only says which way it goes
+FILE *fdopen(int fd, const char *mode) {
+    int open_flags = 0;
+    int file_flags = 0;
+
+    if (fd < 0 || parse_mode(mode, &open_flags, &file_flags) < 0)
+        return NULL;
+
+    FILE *f = malloc(sizeof(FILE));
+    if (!f)
+        return NULL;
+    f->buffer = malloc(DEFAULT_BUFSIZE);
+    if (!f->buffer) {
+        free(f);
+        return NULL;
+    }
+
+    f->fd       = fd;
+    f->buf_size = DEFAULT_BUFSIZE;
+    f->buf_pos  = 0;
+    f->buf_len  = 0;
+    f->flags    = file_flags;
+    f->eof      = 0;
+    f->error    = 0;
+    return f;
+}

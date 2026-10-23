@@ -391,3 +391,51 @@ float log10f(float x)           { return (float)log10(x); }
 float fminf(float x, float y)   { return (float)fmin(x, y); }
 float fmaxf(float x, float y)   { return (float)fmax(x, y); }
 float ldexpf(float x, int e)    { return (float)ldexp(x, e); }
+
+int __fpclassify(double x) {
+    union { double d; uint64_t u; } v = { x };
+    int      e = (int)((v.u >> 52) & 0x7ff);
+    uint64_t m = v.u & 0xfffffffffffffULL;
+    if (e == 0x7ff) return m ? FP_NAN : FP_INFINITE;
+    if (e == 0)     return m ? FP_SUBNORMAL : FP_ZERO;
+    return FP_NORMAL;
+}
+
+int __signbit(double x) {
+    union { double d; uint64_t u; } v = { x };
+    return (int)(v.u >> 63);
+}
+
+// the x87 does these in its own 80 bit format, nothing is lost going through a double
+long double ldexpl(long double x, int exp) {
+    long double result;
+    __asm__ __volatile__ (
+        "fildl %2   \n\t"
+        "fldt %1    \n\t"
+        "fscale     \n\t"
+        "fstp %%st(1) \n\t"
+        "fstpt %0"
+        : "=m"(result)
+        : "m"(x), "m"(exp)
+    );
+    return result;
+}
+
+long double frexpl(long double x, int *exp) {
+    if (x == 0.0L || x != x || x - x != 0.0L) {
+        *exp = 0;
+        return x;
+    }
+    long double mant, e;
+    __asm__ __volatile__ (
+        "fldt %2    \n\t"
+        "fxtract    \n\t"
+        "fstpt %0   \n\t"
+        "fstpt %1"
+        : "=m"(mant), "=m"(e)
+        : "m"(x)
+    );
+    // fxtract gives 1 <= m < 2
+    *exp = (int)e + 1;
+    return mant / 2.0L;
+}

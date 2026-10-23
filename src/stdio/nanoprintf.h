@@ -1036,7 +1036,20 @@ int npf_vpprintf(npf_putc pc, void *pc_ctx, char const *format, va_list args) {
 #if NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS == 1
         zero = (val == 0.);
 #endif
+#ifdef NPF_BLEED_FLOATFMT
+        { // bleeds own, exact to the last digit and with real %e and %g
+          static char const convs[] = { 'f', 'e', 'g', 'a' };
+          char conv = convs[fs.conv_spec - NPF_FMT_SPEC_CONV_FLOAT_DEC];
+          if (!fs.case_adjust) { conv = (char)(conv - ('a' - 'A')); }
+          cbuf_len = floatfmt(cbuf, NANOPRINTF_CONVERSION_BUFFER_SIZE, val, conv, fs.prec, fs.alt_form);
+          int n = cbuf_len < 0 ? -cbuf_len : cbuf_len;
+          for (int i = 0; i < n / 2; ++i) { // nanoprintf wants it backwards
+            char t = cbuf[i]; cbuf[i] = cbuf[n - 1 - i]; cbuf[n - 1 - i] = t;
+          }
+        }
+#else
         cbuf_len = npf_ftoa_rev(cbuf, &fs, val);
+#endif
         if (cbuf_len < 0) { // negative means text (not number), so ignore the '0' flag
            cbuf_len = -cbuf_len;
 #if NANOPRINTF_USE_FIELD_WIDTH_FORMAT_SPECIFIERS == 1

@@ -17,6 +17,7 @@ enum {
     SYS_OPEN            = 2,
     SYS_CLOSE           = 3,
     SYS_STAT            = 4,
+    SYS_FSTAT           = 5,
     SYS_POLL            = 7,
     SYS_SEEK            = 8,
     SYS_MMAP            = 9,
@@ -85,6 +86,7 @@ int _ioctl(int fd, unsigned long request, void* arg);
 long _dup2(int oldfd, int newfd);
 long _pipe(int fds[2]);
 long _stat(const char *path, struct stat *st);
+long _fstat(int fd, struct stat *st);
 long _readdir(int fd, size_t index, dirent_t *out);
 int _mkdir(const char *path, int mode);
 int _unlink(const char *path);
