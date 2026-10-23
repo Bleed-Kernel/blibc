@@ -13,10 +13,9 @@ pid_t waitpid(pid_t pid, int *status, int options) {
         return -1;
     }
 
-    ret = _waitpid((long)pid);
+    ret = _waitstatus((long)pid, status);
     if (ret < 0) return (pid_t)posix_errno_from_ret(ret);
 
-    if (status) *status = 0;
     return (pid_t)ret;
 }
 

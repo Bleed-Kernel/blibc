@@ -19,3 +19,18 @@ int fcntl(int fd, int cmd, ...);
 #define F_SETFL 4
 
 #define O_NONBLOCK 0x20
+#define O_NOCTTY    0x40
+#define O_DIRECTORY 0x80
+#define O_CLOEXEC   0x100
+#define O_NOFOLLOW  0x200
+
+#define F_DUPFD 0
+#define F_GETFD 1
+#define F_SETFD 2
+#define FD_CLOEXEC 1
+
+#define AT_FDCWD            (-100)
+#define AT_SYMLINK_NOFOLLOW 0x100
+#define AT_EMPTY_PATH       0x1000
+
+int openat(int dirfd, const char *path, int flags, ...);

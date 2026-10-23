@@ -149,6 +149,13 @@ int isatty(int fd) {
     return 0;
 }
 
+int dup(int fd) {
+    long ret = _dup(fd);
+    if (ret < 0)
+        return (int)posix_errno_from_ret(ret);
+    return (int)ret;
+}
+
 pid_t getpid(void) {
     long ret = _getpid();
     if (ret < 0)
@@ -183,8 +190,6 @@ pid_t fork(void) {
 }
 
 int execve(const char *path, char *const argv[], char *const envp[]) {
-    (void)envp;
-
     if (!path || !argv) {
         errno = EFAULT;
         return -1;
@@ -199,7 +204,7 @@ int execve(const char *path, char *const argv[], char *const envp[]) {
         }
     }
 
-    long ret = _exec(path, (const char *const *)argv, argc);
+    long ret = _execve(path, (const char *const *)argv, argc, (const char *const *)envp);
     if (ret < 0)
         return (int)posix_errno_from_ret(ret);
 

@@ -25,3 +25,10 @@ int rmdir(const char *path) {
     }
     return unlink(path);
 }
+
+// there are no permissions, if it exists you can do what you like with it
+int access(const char *path, int mode) {
+    struct stat st;
+    (void)mode;
+    return stat(path, &st);
+}

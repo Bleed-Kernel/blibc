@@ -98,3 +98,52 @@ FILE *fdopen(int fd, const char *mode) {
     f->error    = 0;
     return f;
 }
+
+FILE *freopen(const char *path, const char *mode, FILE *stream) {
+    int open_flags = 0;
+    int file_flags = 0;
+
+    if (!stream || parse_mode(mode, &open_flags, &file_flags) < 0)
+        return NULL;
+
+    fflush(stream);
+    if (path) {
+        int fd = _open(path, open_flags);
+        if (fd < 0)
+            return NULL;
+        if (fd != stream->fd) {
+            _dup2(fd, stream->fd);
+            _close(fd);
+        }
+    }
+
+    stream->buf_pos = 0;
+    stream->buf_len = 0;
+    stream->flags   = file_flags | (stream->flags & FILE_STATIC);
+    stream->eof     = 0;
+    stream->error   = 0;
+    return stream;
+}
+
+// only unbuffered is honoured
+int setvbuf(FILE *stream, char *buf, int mode, size_t size) {
+    (void)buf;
+    (void)size;
+    if (!stream)
+        return -1;
+
+    fflush(stream);
+    if (mode == _IONBF && stream->buffer) {
+        if (!(stream->flags & FILE_STATIC))
+            free(stream->buffer);
+        stream->buffer   = NULL;
+        stream->buf_size = 0;
+        stream->buf_pos  = 0;
+        stream->buf_len  = 0;
+    }
+    return 0;
+}
+
+void setbuf(FILE *stream, char *buf) {
+    setvbuf(stream, buf, buf ? _IOFBF : _IONBF, BUFSIZ);
+}

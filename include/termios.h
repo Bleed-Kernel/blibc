@@ -37,6 +37,30 @@ struct winsize {
 #define ICANON (1u << 1)
 #define ISIG   (1u << 2)
 
+#define IGNBRK  0000001
+#define BRKINT  0000002
+#define IGNPAR  0000004
+#define PARMRK  0000010
+#define INPCK   0000020
+#define ISTRIP  0000040
+#define INLCR   0000100
+#define IGNCR   0000200
+#define ICRNL   0000400
+#define IXON    0002000
+#define IXOFF   0010000
+#define OPOST   0000001
+#define ONLCR   0000004
+#define CSIZE   0000060
+#define CS8     0000060
+#define CREAD   0000200
+#define PARENB  0000400
+#define ECHOE   (1u << 4)
+#define ECHOK   (1u << 5)
+#define ECHONL  (1u << 6)
+#define NOFLSH  (1u << 7)
+#define TOSTOP  (1u << 8)
+#define IEXTEN  (1u << 15)
+
 #define TCSANOW   0
 #define TCSADRAIN 1
 #define TCSAFLUSH 2

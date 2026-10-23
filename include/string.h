@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <strings.h>
 
 /// @brief gets the length of a string
 /// @param string string to evaluate
@@ -87,6 +88,7 @@ char *strndup(const char *s, size_t n);
 char *strrchr(const char *s, int c);
 
 char *strstr(const char *haystack, const char *needle);
+char *strcasestr(const char *haystack, const char *needle);
 
 char *strerror(int errnum);
 void *memchr(const void *s, int c, size_t n);

@@ -29,6 +29,12 @@ typedef struct FILE {
     int     error;
 } FILE;
 
+#define BUFSIZ 4096
+
+#define _IOFBF 0
+#define _IOLBF 1
+#define _IONBF 2
+
 extern FILE *const stdin;
 extern FILE *const stdout;
 extern FILE *const stderr;
@@ -42,6 +48,10 @@ int vdprintf(int fd, const char *fmt, va_list ap);
 int putchar(int c);
 int puts(const char *s);
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
+int vasprintf(char **out, const char *fmt, va_list ap);
+int setvbuf(FILE *stream, char *buf, int mode, size_t size);
+void setbuf(FILE *stream, char *buf);
+int asprintf(char **out, const char *fmt, ...);
 int snprintf(char *buf, size_t size, const char *fmt, ...);
 int sprintf(char *str, const char *fmt, ...);
 int sscanf(const char *str, const char *fmt, ...);
@@ -68,6 +78,7 @@ void perror(const char *s);
 
 FILE *fopen(const char *path, const char *mode);
 FILE *fdopen(int fd, const char *mode);
+FILE *freopen(const char *path, const char *mode, FILE *stream);
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
 size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
 int fflush(FILE *stream);

@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <bleed/syscalls.h>
+#include <sys/stat.h>
 
 #include "compat_errno.h"
 
@@ -38,6 +39,46 @@ DIR *opendir(const char *name) {
     return dirp;
 }
 
+DIR *fdopendir(int fd) {
+    struct stat st;
+    if (fstat(fd, &st) < 0)
+        return NULL;
+    if (!S_ISDIR(st.st_mode)) {
+        errno = ENOTDIR;
+        return NULL;
+    }
+
+    DIR *dirp = (DIR *)malloc(sizeof(DIR));
+    if (!dirp) {
+        errno = ENOMEM;
+        return NULL;
+    }
+
+    dirp->fd = fd;
+    dirp->index = 0;
+    dirp->entry.d_ino = 0;
+    dirp->entry.d_type = 0;
+    dirp->entry.d_name[0] = '\0';
+    return dirp;
+}
+
+int dirfd(DIR *dirp) {
+    if (!dirp) {
+        errno = EINVAL;
+        return -1;
+    }
+    return dirp->fd;
+}
+
+static unsigned char dirent_type(int kernel_type) {
+    switch (kernel_type) {
+    case 0:  return DT_DIR;
+    case 1:  return DT_REG;
+    case 2:  return DT_CHR;
+    default: return DT_UNKNOWN;
+    }
+}
+
 struct dirent *readdir(DIR *dirp) {
     dirent_t raw;
     long ret;
@@ -56,7 +97,7 @@ struct dirent *readdir(DIR *dirp) {
 
     dirp->index++;
     dirp->entry.d_ino = (ino_t)dirp->index;
-    dirp->entry.d_type = (unsigned char)raw.type;
+    dirp->entry.d_type = dirent_type(raw.type);
     strncpy(dirp->entry.d_name, raw.name, sizeof(dirp->entry.d_name) - 1);
     dirp->entry.d_name[sizeof(dirp->entry.d_name) - 1] = '\0';
     return &dirp->entry;

@@ -18,8 +18,7 @@ CFLAGS  := \
 	-ffreestanding \
 	-fno-builtin \
 	-fno-stack-protector \
-	-fno-pic \
-	-fno-pie \
+	-fpie \
 	-nostdinc \
 	-I$(INC_DIR) \
 	-Wall -Wextra \
@@ -61,11 +60,13 @@ $(LIBC_A): $(OBJS)
 
 $(BUILD)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
 $(BUILD)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
+
+-include $(OBJS:.o=.d)
 
 clean:
 	rm -rf $(BUILD)

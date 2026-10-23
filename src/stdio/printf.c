@@ -14,6 +14,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <bleed/syscalls.h>
 #include "floatfmt.h"
 #include "nanoprintf.h"
@@ -142,4 +143,31 @@ int printf(const char *fmt, ...) {
 
 int vprintf(const char *fmt, va_list ap) {
     return vfprintf(stdout, fmt, ap);
+}
+
+int vasprintf(char **out, const char *fmt, va_list ap) {
+    va_list copy;
+    va_copy(copy, ap);
+    int len = vsnprintf(NULL, 0, fmt, copy);
+    va_end(copy);
+
+    *out = NULL;
+    if (len < 0)
+        return -1;
+
+    char *buf = malloc((size_t)len + 1);
+    if (!buf)
+        return -1;
+
+    vsnprintf(buf, (size_t)len + 1, fmt, ap);
+    *out = buf;
+    return len;
+}
+
+int asprintf(char **out, const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    int len = vasprintf(out, fmt, ap);
+    va_end(ap);
+    return len;
 }

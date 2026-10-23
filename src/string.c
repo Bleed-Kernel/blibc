@@ -453,3 +453,15 @@ int ffs(int i) {
     }
     return bit;
 }
+
+char *strcasestr(const char *haystack, const char *needle) {
+    size_t len = strlen(needle);
+    if (!len)
+        return (char *)haystack;
+
+    for (; *haystack; haystack++) {
+        if (strncasecmp(haystack, needle, len) == 0)
+            return (char *)haystack;
+    }
+    return NULL;
+}

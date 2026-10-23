@@ -43,10 +43,23 @@ typedef enum {
 #define SA_RESTART  0x2
 
 typedef struct sigaction {
-    uintptr_t handler;
-    sigset_t mask;
-    uint64_t flags;
-    uintptr_t restorer;
+    union {
+        uintptr_t handler;
+        void (*sa_handler)(int);
+        void (*sa_sigaction)(int, void *, void *);
+    };
+    union {
+        sigset_t mask;
+        sigset_t sa_mask;
+    };
+    union {
+        uint64_t flags;
+        unsigned long sa_flags;
+    };
+    union {
+        uintptr_t restorer;
+        void (*sa_restorer)(void);
+    };
 } sigaction_t;
 
 typedef void (*sighandler_t)(int);

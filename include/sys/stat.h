@@ -1,6 +1,7 @@
 #pragma once
 
 #include <sys/types.h>
+#include <time.h>
 
 #define S_IFMT   0170000
 #define S_IFDIR  0040000
@@ -19,6 +20,9 @@
 #define S_ISLNK(m) (((m) & S_IFMT) == S_IFLNK)
 #define S_ISSOCK(m) (((m) & S_IFMT) == S_IFSOCK)
 
+#define S_IRWXU 0700
+#define S_IRWXG 0070
+#define S_IRWXO 0007
 #define S_IRUSR 0400
 #define S_IWUSR 0200
 #define S_IXUSR 0100
@@ -41,12 +45,17 @@ struct stat {
     off_t     st_size;
     long      st_blksize;
     long      st_blocks;
-    time_t    st_atime;
-    time_t    st_mtime;
-    time_t    st_ctime;
+    struct timespec st_atim;
+    struct timespec st_mtim;
+    struct timespec st_ctim;
 };
+
+#define st_atime st_atim.tv_sec
+#define st_mtime st_mtim.tv_sec
+#define st_ctime st_ctim.tv_sec
 
 int stat(const char *path, struct stat *st);
 int lstat(const char *path, struct stat *st);
 int fstat(int fd, struct stat *st);
+int fstatat(int dirfd, const char *path, struct stat *st, int flags);
 int mkdir(const char *path, mode_t mode);

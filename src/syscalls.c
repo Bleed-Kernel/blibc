@@ -46,12 +46,59 @@ long _dup2(int oldfd, int newfd) {
     return syscall_dup2(oldfd, newfd);
 }
 
+long _dup(int fd) {
+    long ret;
+    asm volatile("syscall" : "=a"(ret) : "a"(SYS_DUP), "D"((long)fd) : "rcx", "r11", "memory");
+    return ret;
+}
+
+long _getppid(void) {
+    long ret;
+    asm volatile("syscall" : "=a"(ret) : "a"(SYS_GETPPID) : "rcx", "r11", "memory");
+    return ret;
+}
+
+int _openat(int dirfd, const char *path, int flags) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_OPENAT), "D"((long)dirfd), "S"(path), "d"((long)flags)
+        : "rcx", "r11", "memory"
+    );
+    return (int)ret;
+}
+
+long _fstatat(int dirfd, const char *path, struct bleed_stat *st, int flags) {
+    long ret;
+    register long r10 asm("r10") = flags;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_FSTATAT), "D"((long)dirfd), "S"(path), "d"(st), "r"(r10)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
 long _exec(const char *path, const char *const argv[], uint64_t argc) {
     long ret;
     asm volatile(
         "syscall"
         : "=a"(ret)
         : "a"(SYS_EXEC), "D"(path), "S"(argv), "d"(argc)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _execve(const char *path, const char *const argv[], uint64_t argc, const char *const envp[]) {
+    long ret;
+    register const char *const *r10 asm("r10") = envp;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_EXECVE), "D"(path), "S"(argv), "d"(argc), "r"(r10)
         : "rcx", "r11", "memory"
     );
     return ret;
@@ -384,7 +431,7 @@ long _sigreturn(void) {
     return ret;
 }
 
-static inline long syscall_stat(const char *path, struct stat *st) {
+static inline long syscall_stat(const char *path, struct bleed_stat *st) {
     long ret;
     asm volatile(
         "syscall"
@@ -397,11 +444,11 @@ static inline long syscall_stat(const char *path, struct stat *st) {
     return ret;
 }
 
-long _stat(const char *path, struct stat *st) {
+long _stat(const char *path, struct bleed_stat *st) {
     return syscall_stat(path, st);
 }
 
-static inline long syscall_fstat(int fd, struct stat *st) {
+static inline long syscall_fstat(int fd, struct bleed_stat *st) {
     long ret;
     asm volatile(
         "syscall"
@@ -414,7 +461,7 @@ static inline long syscall_fstat(int fd, struct stat *st) {
     return ret;
 }
 
-long _fstat(int fd, struct stat *st) {
+long _fstat(int fd, struct bleed_stat *st) {
     return syscall_fstat(fd, st);
 }
 
@@ -522,6 +569,61 @@ static inline long syscall_waitpid(long pid){
 
 long _waitpid(long pid){
     return syscall_waitpid(pid);
+}
+
+long _mountinfo(uint64_t index, user_mount_info_t *info) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_MOUNTINFO), "D"(index), "S"(info)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _taskpath(uint64_t pid, char *buf, uint64_t size) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_TASKPATH), "D"(pid), "S"(buf), "d"(size)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _mprotect(void *addr, unsigned long len, int prot) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_MPROTECT), "D"(addr), "S"(len), "d"((long)prot)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _arch_prctl(long code, uint64_t addr) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_ARCH_PRCTL), "D"(code), "S"(addr)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _waitstatus(long pid, int *status) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_WAITSTATUS), "D"(pid), "S"(status)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
 }
 
 static inline long sys_write(long n, long a1, long a2, long a3) {
