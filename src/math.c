@@ -88,6 +88,34 @@ double round(double x) {
     return x < 0.0 ? -floor(-x + 0.5) : floor(x + 0.5);
 }
 
+// adding and taking away 2^52 leaves x rounded the way the fpu rounds
+double rint(double x) {
+    if (!(fabs(x) < 4503599627370496.0))
+        return x;
+    double big = copysign(4503599627370496.0, x);
+    double r = (x + big) - big;
+    return r == 0.0 ? copysign(0.0, x) : r;
+}
+
+double nearbyint(double x) {
+    return rint(x);
+}
+
+// cvtsd2si rounds by mxcsr, which is nearest even unless something changed it
+long lrint(double x) {
+    long r;
+    __asm__ ("cvtsd2si %1, %0" : "=r"(r) : "x"(x));
+    return r;
+}
+
+long long llrint(double x) {
+    return lrint(x);
+}
+
+long lround(double x) {
+    return (long)round(x);
+}
+
 // fprem only takes off so much per go, it says so in c2 and gets run again
 double fmod(double x, double y) {
     double result;
@@ -378,6 +406,15 @@ float floorf(float x)           { return (float)floor(x); }
 float ceilf(float x)            { return (float)ceil(x); }
 float roundf(float x)           { return (float)round(x); }
 float truncf(float x)           { return (float)trunc(x); }
+float rintf(float x)            { return (float)rint(x); }
+float nearbyintf(float x)       { return (float)rint(x); }
+long lroundf(float x)           { return lround(x); }
+
+long lrintf(float x) {
+    long r;
+    __asm__ ("cvtss2si %1, %0" : "=r"(r) : "x"(x));
+    return r;
+}
 float fmodf(float x, float y)   { return (float)fmod(x, y); }
 float atanf(float x)            { return (float)atan(x); }
 float atan2f(float y, float x)  { return (float)atan2(y, x); }

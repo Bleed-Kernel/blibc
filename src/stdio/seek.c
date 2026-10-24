@@ -28,3 +28,7 @@ int fseek(FILE *stream, long offset, int whence) {
     stream->eof = 0;
     return 0;
 }
+
+int fseeko(FILE *stream, off_t offset, int whence) {
+    return fseek(stream, (long)offset, whence);
+}

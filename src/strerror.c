@@ -74,6 +74,32 @@ char *strerror(int errnum) {
         return "Numerical result out of range";
     case ENOSYS:
         return "Function not implemented";
+    case ELOOP:
+        return "Too many levels of symbolic links";
+    case ENOTSOCK:
+        return "Socket operation on non-socket";
+    case EOPNOTSUPP:
+        return "Operation not supported";
+    case EAFNOSUPPORT:
+        return "Address family not supported by protocol";
+    case EADDRINUSE:
+        return "Address already in use";
+    case ENETDOWN:
+        return "Network is down";
+    case ENETUNREACH:
+        return "Network is unreachable";
+    case ECONNRESET:
+        return "Connection reset by peer";
+    case ENOTCONN:
+        return "Transport endpoint is not connected";
+    case ETIMEDOUT:
+        return "Connection timed out";
+    case ECONNREFUSED:
+        return "Connection refused";
+    case EHOSTUNREACH:
+        return "No route to host";
+    case EINPROGRESS:
+        return "Operation now in progress";
     default: {
         static char unknown[48];
         (void)snprintf(unknown, sizeof(unknown), "Unknown error %d", errnum);

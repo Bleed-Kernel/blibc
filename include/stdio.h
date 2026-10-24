@@ -52,6 +52,7 @@ int vdprintf(int fd, const char *fmt, va_list ap);
 int putchar(int c);
 int puts(const char *s);
 int vsnprintf(char *buf, size_t size, const char *fmt, va_list ap);
+int vsprintf(char *str, const char *fmt, va_list ap);
 int vasprintf(char **out, const char *fmt, va_list ap);
 int setvbuf(FILE *stream, char *buf, int mode, size_t size);
 void setbuf(FILE *stream, char *buf);
@@ -89,8 +90,9 @@ int fflush(FILE *stream);
 int fclose(FILE *stream);
 long ftell(FILE *stream);
 int fseek(FILE *stream, long offset, int whence);
+int fseeko(FILE *stream, off_t offset, int whence);
+off_t ftello(FILE *stream);
 
-//stubs for now
 int remove(const char *path);
 int rename(const char *oldpath, const char *newpath);
 

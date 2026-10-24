@@ -24,3 +24,7 @@ int tell(void *handle) {
     stream.fd = (int)(uintptr_t)handle;
     return (int)ftell(&stream);
 }
+
+off_t ftello(FILE *stream) {
+    return (off_t)ftell(stream);
+}

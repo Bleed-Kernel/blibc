@@ -26,6 +26,7 @@ off_t lseek(int fd, off_t offset, int whence);
 int chdir(const char *path);
 int unlink(const char *path);
 int rmdir(const char *path);
+int fsync(int fd);
 unsigned int sleep(unsigned int seconds);
 int usleep(unsigned long usec);
 char *getcwd(char *buf, size_t size);

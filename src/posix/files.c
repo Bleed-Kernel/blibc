@@ -32,3 +32,9 @@ int access(const char *path, int mode) {
     (void)mode;
     return stat(path, &st);
 }
+
+// the kernel has no fsync, just check the fd is real
+int fsync(int fd) {
+    struct stat st;
+    return fstat(fd, &st);
+}

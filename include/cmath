@@ -1,0 +1,29 @@
+#pragma once
+
+#include <math.h>
+
+namespace std {
+    using ::sqrt;   using ::sqrtf;
+    using ::sin;    using ::sinf;
+    using ::cos;    using ::cosf;
+    using ::tan;    using ::tanf;
+    using ::asin;   using ::asinf;
+    using ::acos;   using ::acosf;
+    using ::atan;   using ::atanf;
+    using ::atan2;  using ::atan2f;
+    using ::fabs;   using ::fabsf;
+    using ::floor;  using ::floorf;
+    using ::ceil;   using ::ceilf;
+    using ::round;  using ::roundf;
+    using ::trunc;  using ::truncf;
+    using ::rint;   using ::rintf;
+    using ::fmod;   using ::fmodf;
+    using ::pow;    using ::powf;
+    using ::exp;    using ::expf;
+    using ::log;    using ::logf;
+    using ::log10;
+    using ::hypot;
+    using ::fmin;
+    using ::fmax;
+    using ::copysign;
+}
