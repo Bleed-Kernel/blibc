@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 
 typedef unsigned long fsblkcnt_t;
@@ -24,3 +28,7 @@ struct statvfs {
 
 int statvfs(const char *path, struct statvfs *buf);
 int fstatvfs(int fd, struct statvfs *buf);
+
+#ifdef __cplusplus
+}
+#endif

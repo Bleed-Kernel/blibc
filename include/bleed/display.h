@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdint.h>
 
 struct fb_info {
@@ -18,3 +22,7 @@ struct fb_info {
 #define TTY_IOCTL_SET_FLAGS  0x5402
 
 int get_fb_metadata(struct fb_info *out);
+
+#ifdef __cplusplus
+}
+#endif

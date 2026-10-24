@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stddef.h>
 #include <stdarg.h>
 #include <stdint.h>
@@ -91,3 +95,7 @@ int remove(const char *path);
 int rename(const char *oldpath, const char *newpath);
 
 int tell(void* handle);
+
+#ifdef __cplusplus
+}
+#endif

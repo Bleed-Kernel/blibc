@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 
 struct passwd {
@@ -15,3 +19,7 @@ struct passwd {
 // Bleed has no user accounts, both of these describe root with HOME and SHELL from the environment
 struct passwd *getpwuid(uid_t uid);
 struct passwd *getpwnam(const char *name);
+
+#ifdef __cplusplus
+}
+#endif

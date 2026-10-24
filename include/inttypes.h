@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdint.h>
 
 // int64_t is a long long here, so the 64 bit ones are ll even though long is the same size
@@ -50,3 +54,7 @@
 
 intmax_t  strtoimax(const char *nptr, char **endptr, int base);
 uintmax_t strtoumax(const char *nptr, char **endptr, int base);
+
+#ifdef __cplusplus
+}
+#endif

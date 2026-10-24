@@ -3,6 +3,7 @@
 .extern exit
 .extern __blibc_set_environ
 .extern __blibc_init_tls
+.extern __blibc_init_array
 
 _start:
     # rdi=argc, rsi=argv, rdx=envp
@@ -14,6 +15,8 @@ _start:
 
     mov %r13, %rdi
     call __blibc_set_environ
+
+    call __blibc_init_array
 
     mov %rbx, %rdi
     mov %r12, %rsi

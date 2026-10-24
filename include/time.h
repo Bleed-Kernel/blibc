@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stddef.h>
 #include <sys/types.h>
 
@@ -42,3 +46,7 @@ char *ctime(const time_t *timer);
 
 int clock_gettime(clockid_t id, struct timespec *ts);
 int nanosleep(const struct timespec *req, struct timespec *rem);
+
+#ifdef __cplusplus
+}
+#endif

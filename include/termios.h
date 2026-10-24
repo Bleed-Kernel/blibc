@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 #include <bleed/console.h>
 
@@ -76,3 +80,7 @@ struct winsize {
 int tcgetattr(int fd, struct termios *termios_p);
 int tcsetattr(int fd, int optional_actions, const struct termios *termios_p);
 void cfmakeraw(struct termios *termios_p);
+
+#ifdef __cplusplus
+}
+#endif

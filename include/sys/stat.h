@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 #include <time.h>
 
@@ -59,3 +63,7 @@ int lstat(const char *path, struct stat *st);
 int fstat(int fd, struct stat *st);
 int fstatat(int dirfd, const char *path, struct stat *st, int flags);
 int mkdir(const char *path, mode_t mode);
+
+#ifdef __cplusplus
+}
+#endif

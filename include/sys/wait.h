@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 
 #define WNOHANG    1
@@ -12,3 +16,7 @@
 
 pid_t waitpid(pid_t pid, int *status, int options);
 pid_t wait(int *status);
+
+#ifdef __cplusplus
+}
+#endif

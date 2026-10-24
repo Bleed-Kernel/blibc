@@ -1,4 +1,8 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 #include <stdint.h>
 #include <stddef.h>
 
@@ -53,3 +57,7 @@ int unsetenv(const char *name);
 int atexit(void (*fn)(void));
 void exit(int code) __attribute__((noreturn));
 void _Exit(int code) __attribute__((noreturn));
+
+#ifdef __cplusplus
+}
+#endif

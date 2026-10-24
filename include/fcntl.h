@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 #include <limits.h>
 
@@ -34,3 +38,7 @@ int fcntl(int fd, int cmd, ...);
 #define AT_EMPTY_PATH       0x1000
 
 int openat(int dirfd, const char *path, int flags, ...);
+
+#ifdef __cplusplus
+}
+#endif

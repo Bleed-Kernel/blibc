@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 
 #define DT_UNKNOWN 0
@@ -30,3 +34,7 @@ int dirfd(DIR *dirp);
 struct dirent *readdir(DIR *dirp);
 int closedir(DIR *dirp);
 void rewinddir(DIR *dirp);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <sys/types.h>
 #include <stddef.h>
 #include <bleed/ipc.h>
@@ -68,3 +72,7 @@ extern char **environ;
 int getopt(int argc, char *const argv[], const char *optstring);
 extern char *optarg;
 extern int optind, opterr, optopt;
+
+#ifdef __cplusplus
+}
+#endif

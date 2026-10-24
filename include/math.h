@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define FP_NAN       0
 #define FP_INFINITE  1
 #define FP_ZERO      2
@@ -108,3 +112,7 @@ float log10f(float x);
 float fminf(float x, float y);
 float fmaxf(float x, float y);
 float ldexpf(float x, int e);
+
+#ifdef __cplusplus
+}
+#endif

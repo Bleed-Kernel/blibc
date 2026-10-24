@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -50,3 +54,7 @@ int tty_ansi_clear_screen(int fd);
 int tty_ansi_clear_line(int fd);
 int tty_ansi_scroll_up(int fd, uint32_t n);
 int tty_ansi_scroll_down(int fd, uint32_t n);
+
+#ifdef __cplusplus
+}
+#endif

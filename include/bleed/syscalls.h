@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Raw bleed kernel syscalls: the syscall numbers and one thin `_name` wrapper
 // per syscall (implemented in src/syscalls.c). These return the kernel's value
 // untouched and never set errno; the POSIX wrappers in <unistd.h> etc. do that.
@@ -160,3 +164,7 @@ long _ipc_recv(ipc_message_t *msg);
 
 // time
 int _time(rtc_time_t *buf);
+
+#ifdef __cplusplus
+}
+#endif

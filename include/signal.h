@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <sys/types.h>
 
@@ -79,3 +83,7 @@ int sigfillset(sigset_t *set);
 int sigaddset(sigset_t *set, int sig);
 int sigdelset(sigset_t *set, int sig);
 int sigismember(const sigset_t *set, int sig);
+
+#ifdef __cplusplus
+}
+#endif

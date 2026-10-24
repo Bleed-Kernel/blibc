@@ -1,6 +1,10 @@
 #ifndef STRING_H
 #define STRING_H 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <stddef.h>
 #include <strings.h>
@@ -36,20 +40,20 @@ void *memset(void *s, int c, size_t n);
 /// @param src source
 /// @param n size
 /// @return dest
-void *memcpy(void *restrict dest, const void *restrict src, size_t n);
+void *memcpy(void *__restrict dest, const void *__restrict src, size_t n);
 
 /// @brief copy a string
 /// @param dest destination buffer
 /// @param src source string
 /// @return dest
-char *strcpy(char *restrict dest, const char *restrict src);
+char *strcpy(char *__restrict dest, const char *__restrict src);
 
 /// @brief copy at most n chars from src to dest
 /// @param dest destination
 /// @param src source
 /// @param n max chars
 /// @return dest
-char *strncpy(char *restrict dest, const char *restrict src, size_t n);
+char *strncpy(char *__restrict dest, const char *__restrict src, size_t n);
 
 /// @brief compare two strings
 /// @param s1 string 1
@@ -103,13 +107,17 @@ int strcoll(const char *s1, const char *s2);
 /// @param s string or NULL to continue
 /// @param delim delimiter characters
 /// @return next token or NULL
-char *strtok(char *restrict s, const char *restrict delim);
+char *strtok(char *__restrict s, const char *__restrict delim);
 
 /// @brief reentrant tokenizer
 /// @param s string
 /// @param delim delimiters
 /// @param save state pointer
 /// @return next token
-char *strtok_r(char *restrict s, const char *restrict delim, char **restrict save);
+char *strtok_r(char *__restrict s, const char *__restrict delim, char **__restrict save);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

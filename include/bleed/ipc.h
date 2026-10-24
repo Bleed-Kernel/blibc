@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdint.h>
 #include <sys/types.h>
 #include <stddef.h>
@@ -13,3 +17,7 @@ typedef struct ipc_message {
 
 int ipc_send(pid_t target_pid, void *addr, size_t pages);
 int ipc_recv(ipc_message_t *msg);
+
+#ifdef __cplusplus
+}
+#endif

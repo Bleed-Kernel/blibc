@@ -1,5 +1,9 @@
 #pragma once
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define _UTSNAME_LENGTH 65
 
 struct utsname {
@@ -11,3 +15,7 @@ struct utsname {
 };
 
 int uname(struct utsname *buf);
+
+#ifdef __cplusplus
+}
+#endif
