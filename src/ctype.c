@@ -47,6 +47,18 @@ int isprint(int c) {
     return c >= 32 && c < 127;
 }
 
+int iscntrl(int c) {
+    return (c >= 0 && c < 32) || c == 127;
+}
+
+int isgraph(int c) {
+    return c > 32 && c < 127;
+}
+
+int ispunct(int c) {
+    return isgraph(c) && !isalnum(c);
+}
+
 int tolower(int c) {
     if (isupper(c))
         return c + ('a' - 'A');

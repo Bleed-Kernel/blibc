@@ -74,6 +74,8 @@ char *strerror(int errnum) {
         return "Numerical result out of range";
     case ENOSYS:
         return "Function not implemented";
+    case ENOTEMPTY:
+        return "Directory not empty";
     case ELOOP:
         return "Too many levels of symbolic links";
     case ENOTSOCK:
