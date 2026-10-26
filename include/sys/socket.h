@@ -7,7 +7,7 @@ extern "C" {
 #include <stddef.h>
 #include <sys/types.h>
 
-// bleed has no network stack yet every call will fail with ENOSYS
+// udp over ipv4 only for now, SOCK_STREAM and AF_INET6 sockets fail
 
 typedef unsigned short sa_family_t;
 typedef unsigned int   socklen_t;
@@ -41,6 +41,7 @@ struct sockaddr_storage {
 
 #define SOL_SOCKET      1
 #define SO_REUSEADDR    2
+#define SO_TYPE         3
 #define SO_ERROR        4
 #define SO_BROADCAST    6
 #define SO_SNDBUF       7

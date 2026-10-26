@@ -7,46 +7,79 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-// no network stack in the kernel yet, so sockets fail like they would on a machine without one.
+#include <bleed/syscalls.h>
+#include "compat_errno.h"
 
 const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
-int h_errno;
 
-static int no_net(void) {
-    errno = ENOSYS;
-    return -1;
+static long net_syscall(long nr, long a, long b, long c, long d, long e, long f) {
+    long ret;
+    register long r10 asm("r10") = d;
+    register long r8  asm("r8")  = e;
+    register long r9  asm("r9")  = f;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(nr), "D"(a), "S"(b), "d"(c), "r"(r10), "r"(r8), "r"(r9)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
 }
 
-int socket(int domain, int type, int protocol) { (void)domain; (void)type; (void)protocol; return no_net(); }
-int bind(int fd, const struct sockaddr *addr, socklen_t len) { (void)fd; (void)addr; (void)len; return no_net(); }
-int listen(int fd, int backlog) { (void)fd; (void)backlog; return no_net(); }
-int accept(int fd, struct sockaddr *addr, socklen_t *len) { (void)fd; (void)addr; (void)len; return no_net(); }
-int connect(int fd, const struct sockaddr *addr, socklen_t len) { (void)fd; (void)addr; (void)len; return no_net(); }
-int setsockopt(int fd, int level, int name, const void *val, socklen_t len) { (void)fd; (void)level; (void)name; (void)val; (void)len; return no_net(); }
-int getsockopt(int fd, int level, int name, void *val, socklen_t *len) { (void)fd; (void)level; (void)name; (void)val; (void)len; return no_net(); }
-int getsockname(int fd, struct sockaddr *addr, socklen_t *len) { (void)fd; (void)addr; (void)len; return no_net(); }
-int getpeername(int fd, struct sockaddr *addr, socklen_t *len) { (void)fd; (void)addr; (void)len; return no_net(); }
-int shutdown(int fd, int how) { (void)fd; (void)how; return no_net(); }
-
-ssize_t send(int fd, const void *buf, size_t len, int flags) {
-    (void)fd; (void)buf; (void)len; (void)flags;
-    return no_net();
+static long net_ret(long ret) {
+    return ret < 0 ? posix_errno_from_ret(ret) : ret;
 }
 
-ssize_t recv(int fd, void *buf, size_t len, int flags) {
-    (void)fd; (void)buf; (void)len; (void)flags;
-    return no_net();
+int socket(int domain, int type, int protocol) {
+    return (int)net_ret(net_syscall(SYS_SOCKET, domain, type, protocol, 0, 0, 0));
+}
+
+int bind(int fd, const struct sockaddr *addr, socklen_t len) {
+    return (int)net_ret(net_syscall(SYS_BIND, fd, (long)addr, len, 0, 0, 0));
+}
+
+int connect(int fd, const struct sockaddr *addr, socklen_t len) {
+    return (int)net_ret(net_syscall(SYS_CONNECT, fd, (long)addr, len, 0, 0, 0));
+}
+
+int setsockopt(int fd, int level, int name, const void *val, socklen_t len) {
+    return (int)net_ret(net_syscall(SYS_SETSOCKOPT, fd, level, name, (long)val, len, 0));
+}
+
+int getsockopt(int fd, int level, int name, void *val, socklen_t *len) {
+    return (int)net_ret(net_syscall(SYS_GETSOCKOPT, fd, level, name, (long)val, (long)len, 0));
+}
+
+int getsockname(int fd, struct sockaddr *addr, socklen_t *len) {
+    return (int)net_ret(net_syscall(SYS_GETSOCKNAME, fd, (long)addr, (long)len, 0, 0, 0));
+}
+
+int getpeername(int fd, struct sockaddr *addr, socklen_t *len) {
+    return (int)net_ret(net_syscall(SYS_GETPEERNAME, fd, (long)addr, (long)len, 0, 0, 0));
 }
 
 ssize_t sendto(int fd, const void *buf, size_t len, int flags, const struct sockaddr *addr, socklen_t addrlen) {
-    (void)fd; (void)buf; (void)len; (void)flags; (void)addr; (void)addrlen;
-    return no_net();
+    return net_ret(net_syscall(SYS_SENDTO, fd, (long)buf, (long)len, flags, (long)addr, addrlen));
 }
 
 ssize_t recvfrom(int fd, void *buf, size_t len, int flags, struct sockaddr *addr, socklen_t *addrlen) {
-    (void)fd; (void)buf; (void)len; (void)flags; (void)addr; (void)addrlen;
-    return no_net();
+    return net_ret(net_syscall(SYS_RECVFROM, fd, (long)buf, (long)len, flags, (long)addr, (long)addrlen));
 }
+
+ssize_t send(int fd, const void *buf, size_t len, int flags) {
+    return sendto(fd, buf, len, flags, NULL, 0);
+}
+
+ssize_t recv(int fd, void *buf, size_t len, int flags) {
+    return recvfrom(fd, buf, len, flags, NULL, NULL);
+}
+
+// TODO tcp, until then nothing can listen
+int listen(int fd, int backlog) { (void)fd; (void)backlog; errno = EOPNOTSUPP; return -1; }
+int accept(int fd, struct sockaddr *addr, socklen_t *len) { (void)fd; (void)addr; (void)len; errno = EOPNOTSUPP; return -1; }
+
+// udp has nothing to shut down
+int shutdown(int fd, int how) { (void)fd; (void)how; return 0; }
 
 // a.b.c.d only, each part 0-255
 int inet_aton(const char *cp, struct in_addr *addr) {
@@ -102,36 +135,4 @@ const char *inet_ntop(int af, const void *src, char *dst, socklen_t size) {
         return NULL;
     }
     return dst;
-}
-
-int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints, struct addrinfo **res) {
-    (void)node; (void)service; (void)hints;
-    if (res)
-        *res = NULL;
-    return EAI_NONAME;
-}
-
-void freeaddrinfo(struct addrinfo *res) {
-    while (res) {
-        struct addrinfo *next = res->ai_next;
-        free(res);
-        res = next;
-    }
-}
-
-const char *gai_strerror(int err) {
-    switch (err) {
-    case EAI_NONAME:   return "Name or service not known";
-    case EAI_AGAIN:    return "Temporary failure in name resolution";
-    case EAI_FAIL:     return "Non-recoverable failure in name resolution";
-    case EAI_FAMILY:   return "Address family not supported";
-    case EAI_MEMORY:   return "Memory allocation failure";
-    default:           return "Unknown error";
-    }
-}
-
-struct hostent *gethostbyname(const char *name) {
-    (void)name;
-    h_errno = HOST_NOT_FOUND;
-    return NULL;
 }

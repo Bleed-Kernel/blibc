@@ -55,6 +55,15 @@ enum {
     SYS_EPOLL_CTL       = 233,
     SYS_EPOLL_WAIT      = 232,
     SYS_EPOLL_PWAIT     = 281,
+    SYS_SOCKET          = 41,
+    SYS_CONNECT         = 42,
+    SYS_SENDTO          = 44,
+    SYS_RECVFROM        = 45,
+    SYS_BIND            = 49,
+    SYS_GETSOCKNAME     = 51,
+    SYS_GETPEERNAME     = 52,
+    SYS_SETSOCKOPT      = 54,
+    SYS_GETSOCKOPT      = 55,
 
     // bleed kernel specific system calls
     SYS_YIELD           = 512,
@@ -70,6 +79,7 @@ enum {
     SYS_EXECVE          = 528,
     SYS_WAITSTATUS      = 529,
     SYS_MOUNTINFO       = 530,
+    SYS_MOUNTLABEL      = 531,
 };
 
 
@@ -157,6 +167,7 @@ void* mapfb(size_t *out_pages);
 int _meminfo(system_memory_info_t *buf);
 // -ENOENT once index is past the last mount
 long _mountinfo(uint64_t index, user_mount_info_t *info);
+long _mountlabel(uint64_t index, char *buf, uint64_t size);
 
 // ipc
 long _ipc_send(uint64_t target_pid, uint64_t src_addr, uint64_t pages);

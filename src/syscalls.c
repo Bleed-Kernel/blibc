@@ -582,6 +582,17 @@ long _mountinfo(uint64_t index, user_mount_info_t *info) {
     return ret;
 }
 
+long _mountlabel(uint64_t index, char *buf, uint64_t size) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_MOUNTLABEL), "D"(index), "S"(buf), "d"(size)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
 long _taskpath(uint64_t pid, char *buf, uint64_t size) {
     long ret;
     asm volatile(
