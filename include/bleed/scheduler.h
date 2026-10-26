@@ -33,3 +33,11 @@ typedef struct user_task_usage {
     uint64_t        cpu_time;       // tsc cycles on the cpu so far, only good for comparing cause it isnt really calibrated
     uint64_t        mem_pages;
 } user_task_usage_t;
+
+typedef struct user_cpu_info {
+    uint32_t        id;
+    uint32_t        lapic_id;
+    uint64_t        busy_time;      // tsc cycles, same as cpu_time
+    uint64_t        idle_time;
+    uint64_t        current_pid;
+} user_cpu_info_t;

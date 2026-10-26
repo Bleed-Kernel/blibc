@@ -80,6 +80,7 @@ enum {
     SYS_WAITSTATUS      = 529,
     SYS_MOUNTINFO       = 530,
     SYS_MOUNTLABEL      = 531,
+    SYS_CPUINFO         = 532,
 };
 
 
@@ -153,6 +154,8 @@ uint64_t _taskcount(void);
 uint64_t _taskinfo(uint64_t pid, user_task_info_t *info);
 long _taskusage(uint64_t pid, user_task_usage_t *usage);
 long _taskpath(uint64_t pid, char *buf, uint64_t size);
+
+long _cpuinfo(uint64_t index, user_cpu_info_t *info);
 
 // signals
 long _sigaction(int sig, const sigaction_t *act, sigaction_t *oldact);
