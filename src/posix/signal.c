@@ -38,7 +38,7 @@ int sigaction(int sig, const struct sigaction *act, struct sigaction *oldact) {
 
     if (act) {
         kact = *(const sigaction_t *)act;
-        if (kact.handler != SIG_DFL && kact.handler != SIG_IGN && kact.restorer < 2)
+        if (kact.handler != (uintptr_t)SIG_DFL && kact.handler != (uintptr_t)SIG_IGN && kact.restorer < 2)
             kact.restorer = (uintptr_t)__blibc_sigreturn_restorer;
         act_ptr = &kact;
     }

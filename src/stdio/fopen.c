@@ -112,8 +112,10 @@ FILE *freopen(const char *path, const char *mode, FILE *stream) {
         if (fd < 0)
             return NULL;
         if (fd != stream->fd) {
-            _dup2(fd, stream->fd);
+            long r = _dup2(fd, stream->fd);
             _close(fd);
+            if (r < 0)
+                return NULL;
         }
     }
 

@@ -36,8 +36,9 @@ typedef enum {
     SIGWINCH = 28
 } signal_number_t;
 
-#define SIG_DFL ((uintptr_t)0)
-#define SIG_IGN ((uintptr_t)1)
+typedef void (*sighandler_t)(int);
+#define SIG_DFL ((sighandler_t)0)
+#define SIG_IGN ((sighandler_t)1)
 
 #define SIG_BLOCK   0
 #define SIG_UNBLOCK 1
@@ -65,8 +66,6 @@ typedef struct sigaction {
         void (*sa_restorer)(void);
     };
 } sigaction_t;
-
-typedef void (*sighandler_t)(int);
 
 typedef int sig_atomic_t; 
 

@@ -6,8 +6,9 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 #include <sys/types.h>
+#include <sys/uio.h>
 
-// udp over ipv4 only for now, SOCK_STREAM and AF_INET6 sockets fail
+// ipv4 only for now, AF_INET6 sockets fail
 
 typedef unsigned short sa_family_t;
 typedef unsigned int   socklen_t;
@@ -47,26 +48,50 @@ struct sockaddr_storage {
 #define SO_SNDBUF       7
 #define SO_RCVBUF       8
 #define SO_KEEPALIVE    9
+#define SO_LINGER       13
+#define SO_REUSEPORT    15
 #define SO_RCVTIMEO     20
 #define SO_SNDTIMEO     21
+#define SO_ACCEPTCONN   30
 
 #define MSG_PEEK        0x2
 #define MSG_DONTWAIT    0x40
+#define MSG_WAITALL     0x100
 #define MSG_NOSIGNAL    0x4000
 
 #define SHUT_RD         0
 #define SHUT_WR         1
 #define SHUT_RDWR       2
 
+#define SOMAXCONN       128
+
+struct linger {
+    int l_onoff;
+    int l_linger;
+};
+
+struct msghdr {
+    void         *msg_name;
+    socklen_t     msg_namelen;
+    struct iovec *msg_iov;
+    size_t        msg_iovlen;
+    void         *msg_control;
+    size_t        msg_controllen;
+    int           msg_flags;
+};
+
 int socket(int domain, int type, int protocol);
 int bind(int fd, const struct sockaddr *addr, socklen_t len);
 int listen(int fd, int backlog);
 int accept(int fd, struct sockaddr *addr, socklen_t *len);
+int accept4(int fd, struct sockaddr *addr, socklen_t *len, int flags);
 int connect(int fd, const struct sockaddr *addr, socklen_t len);
 ssize_t send(int fd, const void *buf, size_t len, int flags);
 ssize_t recv(int fd, void *buf, size_t len, int flags);
 ssize_t sendto(int fd, const void *buf, size_t len, int flags, const struct sockaddr *addr, socklen_t addrlen);
 ssize_t recvfrom(int fd, void *buf, size_t len, int flags, struct sockaddr *addr, socklen_t *addrlen);
+ssize_t sendmsg(int fd, const struct msghdr *msg, int flags);
+ssize_t recvmsg(int fd, struct msghdr *msg, int flags);
 int setsockopt(int fd, int level, int name, const void *val, socklen_t len);
 int getsockopt(int fd, int level, int name, void *val, socklen_t *len);
 int getsockname(int fd, struct sockaddr *addr, socklen_t *len);

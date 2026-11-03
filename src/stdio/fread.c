@@ -13,6 +13,19 @@ size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
 
     while (copied < total) {
 
+        // unbuffered (setbuf NULL), or a read too big to be worth bouncing, goes straight to the caller
+        if (stream->buf_pos >= stream->buf_len &&
+            (!stream->buffer || !stream->buf_size || total - copied >= stream->buf_size)) {
+            long r = _read(stream->fd, out + copied, total - copied);
+            if (r <= 0) {
+                if (r == 0) stream->eof = 1;
+                else stream->error = 1;
+                break;
+            }
+            copied += (size_t)r;
+            continue;
+        }
+
         if (stream->buf_pos >= stream->buf_len) {
             long r = _read(stream->fd, stream->buffer, stream->buf_size);
             if (r <= 0) {

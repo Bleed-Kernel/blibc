@@ -57,13 +57,18 @@ enum {
     SYS_EPOLL_PWAIT     = 281,
     SYS_SOCKET          = 41,
     SYS_CONNECT         = 42,
+    SYS_ACCEPT          = 43,
     SYS_SENDTO          = 44,
     SYS_RECVFROM        = 45,
+    SYS_SOCK_SHUTDOWN   = 48,
     SYS_BIND            = 49,
+    SYS_LISTEN          = 50,
     SYS_GETSOCKNAME     = 51,
     SYS_GETPEERNAME     = 52,
     SYS_SETSOCKOPT      = 54,
     SYS_GETSOCKOPT      = 55,
+    SYS_ACCEPT4         = 288,
+    SYS_GETRANDOM       = 318,
 
     // bleed kernel specific system calls
     SYS_YIELD           = 512,

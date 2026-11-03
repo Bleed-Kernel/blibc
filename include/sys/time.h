@@ -20,3 +20,6 @@ int gettimeofday(struct timeval *tv, void *tz);
 #ifdef __cplusplus
 }
 #endif
+
+// linux has it here too :) were such shills
+#include <sys/select.h>

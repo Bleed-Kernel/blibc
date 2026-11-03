@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/socket.h>
+#include <sys/uio.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -74,12 +76,103 @@ ssize_t recv(int fd, void *buf, size_t len, int flags) {
     return recvfrom(fd, buf, len, flags, NULL, NULL);
 }
 
-// TODO tcp, until then nothing can listen
-int listen(int fd, int backlog) { (void)fd; (void)backlog; errno = EOPNOTSUPP; return -1; }
-int accept(int fd, struct sockaddr *addr, socklen_t *len) { (void)fd; (void)addr; (void)len; errno = EOPNOTSUPP; return -1; }
+int listen(int fd, int backlog) {
+    return (int)net_ret(net_syscall(SYS_LISTEN, fd, backlog, 0, 0, 0, 0));
+}
 
-// udp has nothing to shut down
-int shutdown(int fd, int how) { (void)fd; (void)how; return 0; }
+int accept(int fd, struct sockaddr *addr, socklen_t *len) {
+    return (int)net_ret(net_syscall(SYS_ACCEPT, fd, (long)addr, (long)len, 0, 0, 0));
+}
+
+int accept4(int fd, struct sockaddr *addr, socklen_t *len, int flags) {
+    return (int)net_ret(net_syscall(SYS_ACCEPT4, fd, (long)addr, (long)len, flags, 0, 0));
+}
+
+int shutdown(int fd, int how) {
+    return (int)net_ret(net_syscall(SYS_SOCK_SHUTDOWN, fd, how, 0, 0, 0, 0));
+}
+
+static size_t iov_total(const struct iovec *iov, size_t count) {
+    size_t total = 0;
+    for (size_t i = 0; i < count; i++)
+        total += iov[i].iov_len;
+    return total;
+}
+
+// the kernel takes one buffer, a datagram has to stay in one piece
+ssize_t sendmsg(int fd, const struct msghdr *msg, int flags) {
+    size_t total = iov_total(msg->msg_iov, msg->msg_iovlen);
+    char  *flat  = malloc(total ? total : 1);
+    if (!flat) {
+        errno = ENOMEM;
+        return -1;
+    }
+
+    size_t at = 0;
+    for (size_t i = 0; i < msg->msg_iovlen; i++) {
+        memcpy(flat + at, msg->msg_iov[i].iov_base, msg->msg_iov[i].iov_len);
+        at += msg->msg_iov[i].iov_len;
+    }
+
+    ssize_t r = sendto(fd, flat, total, flags, msg->msg_name, msg->msg_namelen);
+    free(flat);
+    return r;
+}
+
+ssize_t recvmsg(int fd, struct msghdr *msg, int flags) {
+    size_t total = iov_total(msg->msg_iov, msg->msg_iovlen);
+    char  *flat  = malloc(total ? total : 1);
+    if (!flat) {
+        errno = ENOMEM;
+        return -1;
+    }
+
+    ssize_t r = recvfrom(fd, flat, total, flags, msg->msg_name, msg->msg_name ? &msg->msg_namelen : NULL);
+    if (r > 0) {
+        size_t at = 0;
+        for (size_t i = 0; i < msg->msg_iovlen && at < (size_t)r; i++) {
+            size_t n = (size_t)r - at;
+            if (n > msg->msg_iov[i].iov_len)
+                n = msg->msg_iov[i].iov_len;
+            memcpy(msg->msg_iov[i].iov_base, flat + at, n);
+            at += n;
+        }
+    }
+    msg->msg_controllen = 0;
+    msg->msg_flags      = 0;
+    free(flat);
+    return r;
+}
+
+ssize_t readv(int fd, const struct iovec *iov, int count) {
+    ssize_t total = 0;
+    for (int i = 0; i < count; i++) {
+        if (!iov[i].iov_len)
+            continue;
+        ssize_t r = read(fd, iov[i].iov_base, iov[i].iov_len);
+        if (r < 0)
+            return total ? total : r;
+        total += r;
+        if ((size_t)r < iov[i].iov_len)
+            break;
+    }
+    return total;
+}
+
+ssize_t writev(int fd, const struct iovec *iov, int count) {
+    ssize_t total = 0;
+    for (int i = 0; i < count; i++) {
+        if (!iov[i].iov_len)
+            continue;
+        ssize_t r = write(fd, iov[i].iov_base, iov[i].iov_len);
+        if (r < 0)
+            return total ? total : r;
+        total += r;
+        if ((size_t)r < iov[i].iov_len)
+            break;
+    }
+    return total;
+}
 
 // a.b.c.d only, each part 0-255
 int inet_aton(const char *cp, struct in_addr *addr) {

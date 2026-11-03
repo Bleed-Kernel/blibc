@@ -72,6 +72,7 @@ extern char **environ;
 
 int getopt(int argc, char *const argv[], const char *optstring);
 extern char *optarg;
+int getentropy(void *buf, size_t len);
 extern int optind, opterr, optopt;
 
 #ifdef __cplusplus

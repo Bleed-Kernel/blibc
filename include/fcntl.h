@@ -27,6 +27,7 @@ int fcntl(int fd, int cmd, ...);
 #define O_DIRECTORY 0x80
 #define O_CLOEXEC   0x100
 #define O_NOFOLLOW  0x200
+#define O_EXCL      0x400
 
 #define F_DUPFD 0
 #define F_GETFD 1

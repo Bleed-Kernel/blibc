@@ -43,6 +43,10 @@ lldiv_t lldiv(long long num, long long den);
 int rand(void);
 void srand(unsigned int seed);
 
+uint32_t arc4random(void);
+void arc4random_buf(void *buf, size_t len);
+uint32_t arc4random_uniform(uint32_t upper);
+
 void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
 void *bsearch(const void *key, const void *base, size_t nmemb, size_t size,
               int (*compar)(const void *, const void *));
