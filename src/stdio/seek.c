@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <bleed/syscalls.h>
 
-int fseek(FILE *stream, long offset, int whence) {
+int fseek_unlocked(FILE *stream, long offset, int whence) {
     long ret;
 
     if (!stream) {

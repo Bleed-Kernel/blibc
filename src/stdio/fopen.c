@@ -48,7 +48,7 @@ FILE *fopen(const char *path, const char *mode) {
     if (fd < 0)
         return NULL;
 
-    FILE *f = malloc(sizeof(FILE));
+    FILE *f = calloc(1, sizeof(FILE));
     if (!f) {
         _close(fd);
         return NULL;
@@ -80,7 +80,7 @@ FILE *fdopen(int fd, const char *mode) {
     if (fd < 0 || parse_mode(mode, &open_flags, &file_flags) < 0)
         return NULL;
 
-    FILE *f = malloc(sizeof(FILE));
+    FILE *f = calloc(1, sizeof(FILE));
     if (!f)
         return NULL;
     f->buffer = malloc(DEFAULT_BUFSIZE);

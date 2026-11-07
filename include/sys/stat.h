@@ -37,21 +37,23 @@ extern "C" {
 #define S_IWOTH 0002
 #define S_IXOTH 0001
 
+// linuxs x86_64 layout, same as the kernel fills in
 struct stat {
     dev_t     st_dev;
     ino_t     st_ino;
+    nlink_t   st_nlink;
     mode_t    st_mode;
     uid_t     st_uid;
     gid_t     st_gid;
     unsigned int st_pad;
-    nlink_t   st_nlink;
     dev_t     st_rdev;
     off_t     st_size;
-    long      st_blksize;
-    long      st_blocks;
+    blksize_t st_blksize;
+    blkcnt_t  st_blocks;
     struct timespec st_atim;
     struct timespec st_mtim;
     struct timespec st_ctim;
+    long      __unused[3];
 };
 
 #define st_atime st_atim.tv_sec
@@ -63,6 +65,22 @@ int lstat(const char *path, struct stat *st);
 int fstat(int fd, struct stat *st);
 int fstatat(int dirfd, const char *path, struct stat *st, int flags);
 int mkdir(const char *path, mode_t mode);
+
+// no permissions or settable times exist, these succeed on anything that does
+int chmod(const char *path, mode_t mode);
+int fchmod(int fd, mode_t mode);
+int fchmodat(int dirfd, const char *path, mode_t mode, int flags);
+mode_t umask(mode_t mask);
+
+#define UTIME_NOW   ((1l << 30) - 1l)
+#define UTIME_OMIT  ((1l << 30) - 2l)
+int utimensat(int dirfd, const char *path, const struct timespec times[2], int flags);
+int futimens(int fd, const struct timespec times[2]);
+
+// no fifos on bleed, these say ENOSYS
+int mkfifo(const char *path, mode_t mode);
+int mkfifoat(int dirfd, const char *path, mode_t mode);
+int mknod(const char *path, mode_t mode, dev_t dev);
 
 #ifdef __cplusplus
 }

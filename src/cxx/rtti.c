@@ -110,7 +110,7 @@ static void walk(search_t *s, const type_info_t *type, const char *obj, int publ
     }
 }
 
-void *__dynamic_cast(const void *src_ptr, const type_info_t *src_type, const type_info_t *dst_type, ptrdiff_t hint) {
+__attribute__((weak)) void *__dynamic_cast(const void *src_ptr, const type_info_t *src_type, const type_info_t *dst_type, ptrdiff_t hint) {
     (void)hint;
     if (!src_ptr)
         return NULL;
@@ -137,12 +137,12 @@ void *__dynamic_cast(const void *src_ptr, const type_info_t *src_type, const typ
 }
 
 // dynamic_cast to a reference that fails, and typeid of a null pointer, would throw
-void __cxa_bad_cast(void) {
+__attribute__((weak)) void __cxa_bad_cast(void) {
     fprintf(stderr, "bad dynamic_cast\n");
     abort();
 }
 
-void __cxa_bad_typeid(void) {
+__attribute__((weak)) void __cxa_bad_typeid(void) {
     fprintf(stderr, "typeid of a null pointer\n");
     abort();
 }

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-char *fgets(char *s, int size, FILE *stream) {
+char *fgets_unlocked(char *s, int size, FILE *stream) {
     if (!s || size <= 0 || !stream) {
         return NULL;
     }

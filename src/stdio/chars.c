@@ -3,12 +3,12 @@
 #include <string.h>
 #include <errno.h>
 
-int fgetc(FILE *stream) {
+int fgetc_unlocked(FILE *stream) {
     if (stream && stream->buf_pos < stream->buf_len)
         return stream->buffer[stream->buf_pos++];
 
     unsigned char ch;
-    return fread(&ch, 1, 1, stream) == 1 ? ch : EOF;
+    return fread_unlocked(&ch, 1, 1, stream) == 1 ? ch : EOF;
 }
 
 int getc(FILE *stream) {
@@ -19,7 +19,7 @@ int getchar(void) {
     return fgetc(stdin);
 }
 
-int ungetc(int c, FILE *stream) {
+int ungetc_unlocked(int c, FILE *stream) {
     if (c == EOF || !stream || !(stream->flags & FILE_READ) || !stream->buffer)
         return EOF;
 
@@ -52,7 +52,7 @@ int fputs(const char *s, FILE *stream) {
     return fwrite(s, 1, len, stream) == len ? 0 : EOF;
 }
 
-ssize_t getdelim(char **line, size_t *cap, int delim, FILE *stream) {
+ssize_t getdelim_unlocked(char **line, size_t *cap, int delim, FILE *stream) {
     if (!line || !cap || !stream) {
         errno = EINVAL;
         return -1;
@@ -60,7 +60,7 @@ ssize_t getdelim(char **line, size_t *cap, int delim, FILE *stream) {
 
     size_t len = 0;
     int    c;
-    while ((c = fgetc(stream)) != EOF) {
+    while ((c = fgetc_unlocked(stream)) != EOF) {
         if (len + 2 > *cap || !*line) {
             size_t grown = *cap < 64 ? 128 : *cap * 2;
             char  *more  = realloc(*line, grown);

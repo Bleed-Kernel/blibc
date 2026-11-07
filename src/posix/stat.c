@@ -18,9 +18,12 @@ static void from_kernel(const struct bleed_stat *k, struct stat *st) {
     st->st_size    = (off_t)k->size;
     st->st_blksize = (long)k->blksize;
     st->st_blocks  = (long)k->blocks;
-    st->st_atim.tv_sec = (time_t)k->atime;
-    st->st_mtim.tv_sec = (time_t)k->mtime;
-    st->st_ctim.tv_sec = (time_t)k->ctime;
+    st->st_atim.tv_sec  = (time_t)k->atime;
+    st->st_atim.tv_nsec = (long)k->atime_nsec;
+    st->st_mtim.tv_sec  = (time_t)k->mtime;
+    st->st_mtim.tv_nsec = (long)k->mtime_nsec;
+    st->st_ctim.tv_sec  = (time_t)k->ctime;
+    st->st_ctim.tv_nsec = (long)k->ctime_nsec;
 }
 
 int stat(const char *path, struct stat *st) {
@@ -32,9 +35,8 @@ int stat(const char *path, struct stat *st) {
     return 0;
 }
 
-// theres no links to not follow
 int lstat(const char *path, struct stat *st) {
-    return stat(path, st);
+    return fstatat(AT_FDCWD, path, st, AT_SYMLINK_NOFOLLOW);
 }
 
 int fstat(int fd, struct stat *st) {

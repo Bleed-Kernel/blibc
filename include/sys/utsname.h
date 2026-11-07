@@ -12,6 +12,7 @@ struct utsname {
     char release[_UTSNAME_LENGTH];
     char version[_UTSNAME_LENGTH];
     char machine[_UTSNAME_LENGTH];
+    char domainname[_UTSNAME_LENGTH];
 };
 
 int uname(struct utsname *buf);

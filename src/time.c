@@ -60,7 +60,79 @@ static int      wall_read;
 static time_t   wall_base;
 static uint64_t wall_base_fs;
 
+static long clock_syscall(long n, long a, long b) {
+    long ret;
+    asm volatile("syscall" : "=a"(ret) : "a"(n), "D"(a), "S"(b) : "rcx", "r11", "memory");
+    return ret;
+}
+
+static int                 clock_fast;
+static user_clock_params_t clock_params;
+static uint64_t            clock_last;
+
+static int clock_fast_ready(void) {
+    int s = __atomic_load_n(&clock_fast, __ATOMIC_ACQUIRE);
+    if (s)
+        return s > 0;
+    // two threads racing here both write the same numbers
+    user_clock_params_t p;
+    s = clock_syscall(SYS_CLOCKPARAMS, (long)&p, 0) == 0 && p.counts_per_sec ? 1 : -1;
+    if (s > 0)
+        clock_params = p;
+    __atomic_store_n(&clock_fast, s, __ATOMIC_RELEASE);
+    return s > 0;
+}
+
+// the same sums as the kernels clock_monotonic_ns, so timeouts made from it line up
+static uint64_t clock_fast_ns(void) {
+    uint32_t lo, hi;
+    __asm__ volatile("lfence; rdtsc" : "=a"(lo), "=d"(hi) :: "memory");
+    uint64_t tsc    = ((uint64_t)hi << 32) | lo;
+    uint64_t counts = clock_params.counts_base +
+                      (uint64_t)(((unsigned __int128)(tsc - clock_params.tsc_base) * clock_params.mult) >> 32);
+    uint64_t ns = (counts / clock_params.counts_per_sec) * 1000000000ULL +
+                  (counts % clock_params.counts_per_sec) * clock_params.fs_per_tick / 1000000ULL;
+
+    // threads on cpus whose tscs are a hair apart must not see it go backwards
+    uint64_t last = __atomic_load_n(&clock_last, __ATOMIC_RELAXED);
+    while (ns > last) {
+        if (__atomic_compare_exchange_n(&clock_last, &last, ns, 1, __ATOMIC_RELAXED, __ATOMIC_RELAXED))
+            return ns;
+    }
+    return last;
+}
+
+static int clock_fast_read(clockid_t id, struct timespec *ts) {
+    uint64_t ns;
+    switch (id) {
+    case CLOCK_MONOTONIC:
+    case CLOCK_MONOTONIC_RAW:
+    case CLOCK_MONOTONIC_COARSE:
+    case CLOCK_BOOTTIME:
+        if (!clock_fast_ready())
+            return -1;
+        ns = clock_fast_ns();
+        break;
+    case CLOCK_REALTIME:
+    case CLOCK_REALTIME_COARSE:
+        if (!clock_fast_ready())
+            return -1;
+        ns = clock_params.realtime_base_ns + clock_fast_ns();
+        break;
+    default:
+        return -1;
+    }
+    ts->tv_sec  = (time_t)(ns / 1000000000ULL);
+    ts->tv_nsec = (long)(ns % 1000000000ULL);
+    return 0;
+}
+
 static void wall_now(struct timespec *ts) {
+    if (clock_fast_read(CLOCK_REALTIME, ts) == 0)
+        return;
+    if (clock_syscall(228, CLOCK_REALTIME, (long)ts) == 0)
+        return;
+
     uint64_t fs = hpet_now();
     if (!wall_read) {
         wall_read    = 1;
@@ -85,6 +157,16 @@ int clock_gettime(clockid_t id, struct timespec *ts) {
         errno = EINVAL;
         return -1;
     }
+    if (clock_fast_read(id, ts) == 0)
+        return 0;
+    long r = clock_syscall(228, id, (long)ts);
+    if (r == 0)
+        return 0;
+    if (r != -ENOSYS) {
+        errno = (int)-r;
+        return -1;
+    }
+
     if (id == CLOCK_REALTIME) {
         wall_now(ts);
         return 0;
@@ -97,6 +179,15 @@ int clock_gettime(clockid_t id, struct timespec *ts) {
     }
     errno = EINVAL;
     return -1;
+}
+
+int clock_getres(clockid_t id, struct timespec *res) {
+    long r = clock_syscall(229, id, (long)res);
+    if (r < 0) {
+        errno = (int)-r;
+        return -1;
+    }
+    return 0;
 }
 
 int gettimeofday(struct timeval *tv, void *tz) {
@@ -319,3 +410,10 @@ int nanosleep(const struct timespec *req, struct timespec *rem) {
     }
     return 0;
 }
+
+static char utc_name[] = "UTC";
+char *tzname[2] = { utc_name, utc_name };
+long timezone;
+int daylight;
+
+void tzset(void) {}

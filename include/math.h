@@ -122,6 +122,140 @@ float fminf(float x, float y);
 float fmaxf(float x, float y);
 float ldexpf(float x, int e);
 
+// the rest of c99, float and long double ones go through double
+typedef float  float_t;
+typedef double double_t;
+
+#define FP_ILOGB0       (-2147483647 - 1)
+#define FP_ILOGBNAN     (-2147483647 - 1)
+#define MATH_ERRNO      1
+#define MATH_ERREXCEPT  2
+#define math_errhandling 2
+#define HUGE_VALL       __builtin_huge_vall()
+#define M_2_SQRTPI      1.12837916709551257390
+#define isgreater(x, y)      __builtin_isgreater(x, y)
+#define isgreaterequal(x, y) __builtin_isgreaterequal(x, y)
+#define isless(x, y)         __builtin_isless(x, y)
+#define islessequal(x, y)    __builtin_islessequal(x, y)
+#define islessgreater(x, y)  __builtin_islessgreater(x, y)
+#define isunordered(x, y)    __builtin_isunordered(x, y)
+
+extern int signgam;
+
+long double sqrtl(long double x);
+float cbrtf(float x);
+long double cbrtl(long double x);
+long double sinl(long double x);
+long double cosl(long double x);
+long double tanl(long double x);
+long double asinl(long double x);
+long double acosl(long double x);
+long double atanl(long double x);
+float sinhf(float x);
+long double sinhl(long double x);
+float coshf(float x);
+long double coshl(long double x);
+float tanhf(float x);
+long double tanhl(long double x);
+double asinh(double x);
+float asinhf(float x);
+long double asinhl(long double x);
+double acosh(double x);
+float acoshf(float x);
+long double acoshl(long double x);
+double atanh(double x);
+float atanhf(float x);
+long double atanhl(long double x);
+long double expl(long double x);
+float exp2f(float x);
+long double exp2l(long double x);
+double expm1(double x);
+float expm1f(float x);
+long double expm1l(long double x);
+long double logl(long double x);
+long double log2l(long double x);
+long double log10l(long double x);
+double log1p(double x);
+float log1pf(float x);
+long double log1pl(long double x);
+double logb(double x);
+float logbf(float x);
+long double logbl(long double x);
+long double fabsl(long double x);
+long double floorl(long double x);
+long double ceill(long double x);
+long double truncl(long double x);
+long double roundl(long double x);
+long double rintl(long double x);
+long double nearbyintl(long double x);
+double erf(double x);
+float erff(float x);
+long double erfl(long double x);
+double erfc(double x);
+float erfcf(float x);
+long double erfcl(long double x);
+double lgamma(double x);
+float lgammaf(float x);
+long double lgammal(long double x);
+double tgamma(double x);
+float tgammaf(float x);
+long double tgammal(long double x);
+float hypotf(float x, float y);
+long double hypotl(long double x, long double y);
+long double atan2l(long double x, long double y);
+long double fmodl(long double x, long double y);
+long double fminl(long double x, long double y);
+long double fmaxl(long double x, long double y);
+float copysignf(float x, float y);
+long double copysignl(long double x, long double y);
+long double powl(long double x, long double y);
+double remainder(double x, double y);
+float remainderf(float x, float y);
+long double remainderl(long double x, long double y);
+double fdim(double x, double y);
+float fdimf(float x, float y);
+long double fdiml(long double x, long double y);
+double nextafter(double x, double y);
+float nextafterf(float x, float y);
+long double nextafterl(long double x, long double y);
+double fma(double x, double y, double z);
+float fmaf(float x, float y, float z);
+long double fmal(long double x, long double y, long double z);
+double remquo(double x, double y, int *q);
+float remquof(float x, float y, int *q);
+long double remquol(long double x, long double y, int *q);
+int ilogb(double x);
+int ilogbf(float x);
+int ilogbl(long double x);
+double nexttoward(double x, long double y);
+float nexttowardf(float x, long double y);
+long double nexttowardl(long double x, long double y);
+double nan(const char *tag);
+float nanf(const char *tag);
+long double nanl(const char *tag);
+double scalbln(double x, long n);
+float scalblnf(float x, long n);
+long double scalblnl(long double x, long n);
+float scalbnf(float x, int n);
+long double scalbnl(long double x, int n);
+float frexpf(float x, int *e);
+float modff(float x, float *ip);
+long double modfl(long double x, long double *ip);
+long long llround(double x);
+long long llroundf(float x);
+long long llroundl(long double x);
+long long llrintf(float x);
+long long llrintl(long double x);
+long lrintl(long double x);
+long lroundl(long double x);
+void sincos(double x, double *s, double *c);
+void sincosf(float x, float *s, float *c);
+double exp10(double x);
+float exp10f(float x);
+double significand(double x);
+double lgamma_r(double x, int *sign);
+float lgammaf_r(float x, int *sign);
+
 #ifdef __cplusplus
 }
 #endif

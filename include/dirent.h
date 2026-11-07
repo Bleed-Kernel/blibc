@@ -16,16 +16,22 @@ extern "C" {
 #define DT_SOCK    12
 
 struct dirent {
-    ino_t d_ino;
-    unsigned char d_type;
-    char d_name[256];
+    ino_t          d_ino;
+    off_t          d_off;
+    unsigned short d_reclen;
+    unsigned char  d_type;
+    char           d_name[256];
 };
 typedef struct dirent dirent;
+
+struct __dirsnap;
 
 typedef struct {
     int fd;
     unsigned long index;
     struct dirent entry;
+    struct __dirsnap *snap;
+    unsigned long count;
 } DIR;
 
 DIR *opendir(const char *name);

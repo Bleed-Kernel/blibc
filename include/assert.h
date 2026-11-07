@@ -17,3 +17,7 @@ void __assert_fail(const char *expr, const char *file, int line, const char *fun
 #ifdef __cplusplus
 }
 #endif
+
+#if !defined(__cplusplus) && !defined(static_assert)
+#define static_assert _Static_assert
+#endif

@@ -36,6 +36,8 @@ DIR *opendir(const char *name) {
     dirp->entry.d_ino = 0;
     dirp->entry.d_type = 0;
     dirp->entry.d_name[0] = '\0';
+    dirp->snap = NULL;
+    dirp->count = 0;
     return dirp;
 }
 
@@ -59,6 +61,8 @@ DIR *fdopendir(int fd) {
     dirp->entry.d_ino = 0;
     dirp->entry.d_type = 0;
     dirp->entry.d_name[0] = '\0';
+    dirp->snap = NULL;
+    dirp->count = 0;
     return dirp;
 }
 
@@ -75,31 +79,71 @@ static unsigned char dirent_type(int kernel_type) {
     case 0:  return DT_DIR;
     case 1:  return DT_REG;
     case 2:  return DT_CHR;
+    case 3:  return DT_LNK;
     default: return DT_UNKNOWN;
     }
 }
 
-struct dirent *readdir(DIR *dirp) {
-    dirent_t raw;
-    long ret;
+struct __dirsnap {
+    unsigned char type;
+    char name[256];
+};
 
+static int read_listing(DIR *dirp) {
+    unsigned long cap = 16, n = 0;
+    struct __dirsnap *snap = malloc(cap * sizeof(*snap));
+    if (!snap) {
+        errno = ENOMEM;
+        return -1;
+    }
+
+    for (;;) {
+        dirent_t raw;
+        long ret = _readdir(dirp->fd, (size_t)n, &raw);
+        if (ret == -ENOENT)
+            break;
+        if (ret < 0) {
+            free(snap);
+            posix_errno_from_ret(ret);
+            return -1;
+        }
+        if (n == cap) {
+            struct __dirsnap *bigger = realloc(snap, cap * 2 * sizeof(*snap));
+            if (!bigger) {
+                free(snap);
+                errno = ENOMEM;
+                return -1;
+            }
+            snap = bigger;
+            cap *= 2;
+        }
+        snap[n].type = dirent_type(raw.type);
+        strncpy(snap[n].name, raw.name, sizeof(snap[n].name) - 1);
+        snap[n].name[sizeof(snap[n].name) - 1] = '\0';
+        n++;
+    }
+
+    dirp->snap  = snap;
+    dirp->count = n;
+    return 0;
+}
+
+struct dirent *readdir(DIR *dirp) {
     if (!dirp) {
         errno = EINVAL;
         return NULL;
     }
-
-    ret = _readdir(dirp->fd, (size_t)dirp->index, &raw);
-    if (ret == -ENOENT) return NULL;
-    if (ret < 0) {
-        posix_errno_from_ret(ret);
+    if (!dirp->snap && read_listing(dirp) < 0)
         return NULL;
-    }
+    if (dirp->index >= dirp->count)
+        return NULL;
 
-    dirp->index++;
+    struct __dirsnap *e = &dirp->snap[dirp->index++];
     dirp->entry.d_ino = (ino_t)dirp->index;
-    dirp->entry.d_type = dirent_type(raw.type);
-    strncpy(dirp->entry.d_name, raw.name, sizeof(dirp->entry.d_name) - 1);
-    dirp->entry.d_name[sizeof(dirp->entry.d_name) - 1] = '\0';
+    dirp->entry.d_off = (off_t)dirp->index;
+    dirp->entry.d_reclen = (unsigned short)sizeof(dirp->entry);
+    dirp->entry.d_type = e->type;
+    memcpy(dirp->entry.d_name, e->name, sizeof(dirp->entry.d_name));
     return &dirp->entry;
 }
 
@@ -112,6 +156,7 @@ int closedir(DIR *dirp) {
     }
 
     ret = _close(dirp->fd);
+    free(dirp->snap);
     free(dirp);
     if (ret < 0) return (int)posix_errno_from_ret(ret);
     return 0;
@@ -119,5 +164,8 @@ int closedir(DIR *dirp) {
 
 void rewinddir(DIR *dirp) {
     if (!dirp) return;
+    free(dirp->snap);
+    dirp->snap  = NULL;
+    dirp->count = 0;
     dirp->index = 0;
 }

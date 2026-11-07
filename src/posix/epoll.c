@@ -67,6 +67,14 @@ static inline long syscall_epoll_pwait(int epfd, struct epoll_event *events, int
     return ret;
 }
 
+int epoll_create(int size) {
+    if (size <= 0) {
+        errno = EINVAL;
+        return -1;
+    }
+    return epoll_create1(0);
+}
+
 int epoll_create1(int flags) {
     long res = syscall_epoll_create1(flags);
     if (res < 0) {

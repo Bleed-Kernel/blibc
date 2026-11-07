@@ -34,6 +34,15 @@ OBJS := \
 
 START := $(BUILD)/start.o
 
+LD       := x86_64-elf-ld
+LIBC_SO  := libc.so
+PIC      := $(BUILD)/pic
+PIC_OBJS := \
+	$(C_SRCS:$(SRC_DIR)/%.c=$(PIC)/%.o) \
+	$(filter-out $(PIC)/start.o,$(S_SRCS:$(SRC_DIR)/%.S=$(PIC)/%.o))
+PIC_FLAGS := $(filter-out -fpie,$(CFLAGS)) -fPIC -DBLIBC_SHARED
+CRT      := $(BUILD)/dstart.o $(BUILD)/crtdso.o
+
 HEADERS := $(shell find $(INC_DIR) -type f)
 SYSROOT_STAMP := $(SYSROOT)/.stamp
 
@@ -46,10 +55,10 @@ sysroot: $(SYSROOT_STAMP)
 # rebuilt from scratch so headers removed from include/ don't linger, but only when something
 # changed, and built off to the side then swapped in. programs building at the same time all
 # call this and copy out of it, an rm -rf under them was what broke parallel builds
-$(SYSROOT_STAMP): $(LIBC_A) $(START) $(HEADERS)
+$(SYSROOT_STAMP): $(LIBC_A) $(START) $(LIBC_SO) $(CRT) $(HEADERS)
 	@rm -rf $(SYSROOT).tmp
 	@mkdir -p $(SYSROOT).tmp/lib $(SYSROOT).tmp/include
-	cp $(LIBC_A) $(START) $(SYSROOT).tmp/lib/
+	cp $(LIBC_A) $(START) $(LIBC_SO) $(CRT) $(SYSROOT).tmp/lib/
 	cp -r $(INC_DIR)/* $(SYSROOT).tmp/include/
 	@touch $(SYSROOT).tmp/.stamp
 	@rm -rf $(SYSROOT) && mv $(SYSROOT).tmp $(SYSROOT)
@@ -57,6 +66,24 @@ $(SYSROOT_STAMP): $(LIBC_A) $(START) $(HEADERS)
 $(LIBC_A): $(OBJS)
 	rm -f $@
 	$(AR) rcs $@ $^
+
+# functions bind to themselves inside libc, data goes through the GOT so a programs copy
+# of something like environ is the one everybody sees
+$(LIBC_SO): $(PIC_OBJS)
+	$(LD) -shared -soname libc.so -e _dlstart -Bsymbolic-functions --hash-style=both \
+		--eh-frame-hdr -z now -z noexecstack -o $@ $(PIC_OBJS) $(shell $(CC) -print-libgcc-file-name)
+
+$(PIC)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(PIC_FLAGS) -MMD -MP -c $< -o $@
+
+$(PIC)/%.o: $(SRC_DIR)/%.S
+	@mkdir -p $(dir $@)
+	$(CC) $(PIC_FLAGS) -MMD -MP -c $< -o $@
+
+$(BUILD)/%.o: crt/%.S
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BUILD)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(dir $@)
@@ -66,9 +93,9 @@ $(BUILD)/%.o: $(SRC_DIR)/%.S
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
--include $(OBJS:.o=.d)
+-include $(OBJS:.o=.d) $(PIC_OBJS:.o=.d)
 
 clean:
 	rm -rf $(BUILD)
-	rm -rf $(LIBC_A)
+	rm -rf $(LIBC_A) $(LIBC_SO)
 	rm -rf $(SYSROOT) $(SYSROOT).tmp

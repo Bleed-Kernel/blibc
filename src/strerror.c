@@ -94,6 +94,10 @@ char *strerror(int errnum) {
         return "Connection reset by peer";
     case ENOTCONN:
         return "Transport endpoint is not connected";
+    case EILSEQ:
+        return "Invalid or incomplete multibyte or wide character";
+    case EOVERFLOW:
+        return "Value too large for defined data type";
     case ETIMEDOUT:
         return "Connection timed out";
     case ECONNREFUSED:
@@ -108,4 +112,18 @@ char *strerror(int errnum) {
         return unknown;
     }
     }
+}
+
+int strerror_r(int errnum, char *buf, size_t len) {
+    const char *msg = strerror(errnum);
+    size_t n = strlen(msg);
+    if (!len)
+        return 34;
+    if (n >= len) {
+        memcpy(buf, msg, len - 1);
+        buf[len - 1] = 0;
+        return 34;
+    }
+    memcpy(buf, msg, n + 1);
+    return 0;
 }

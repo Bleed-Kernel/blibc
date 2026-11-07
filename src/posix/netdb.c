@@ -14,23 +14,23 @@
 #include <bleed/syscalls.h>
 #include <bleed/netdevice.h>
 
-// /initrd/etc/hosts, then A records from /initrd/etc/resolv.conf or the dns server dhcp gave the kernel, no cache tho
+// /etc/hosts, then A records from /etc/resolv.conf or the dns server dhcp gave the kernel, no cache tho
 
 #define DNS_PORT        53
 #define DNS_TRIES       2
 #define DNS_WAIT_MS     1500
-#define DNS_MAX         512     // a plain udp answer never goes past this
-#define DNS_TCP_MAX     8192    // too big for udp comes over tcp, way past enough addresses
+#define DNS_MAX         512
+#define DNS_TCP_MAX     8192
 #define DNS_MAX_ADDRS   8
-#define DNS_MAX_SERVERS 3       // like glibc
-#define RESOLV_PATH     "/initrd/etc/resolv.conf"
+#define DNS_MAX_SERVERS 3
+#define RESOLV_PATH     "/etc/resolv.conf"
 #define DNS_TYPE_A      1
 #define DNS_CLASS_IN    1
 #define DNS_FLAG_RD     0x0100
 #define DNS_FLAG_TC     0x0200
 #define DNS_RCODE_MASK  0x000F
 
-#define HOSTS_PATH      "/initrd/etc/hosts"
+#define HOSTS_PATH      "/etc/hosts"
 #define HOSTS_LINE      512
 
 int h_errno;

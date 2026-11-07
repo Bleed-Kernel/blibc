@@ -1,6 +1,13 @@
 #pragma once
 
-extern int errno;
+#ifdef __cplusplus
+extern "C" {
+#endif
+int *__errno_location(void);
+#ifdef __cplusplus
+}
+#endif
+#define errno (*__errno_location())
 
 #define EPERM           1
 #define ENOENT          2
@@ -41,6 +48,8 @@ extern int errno;
 #define ENOSYS          38
 #define ENOTEMPTY       39
 #define ELOOP           40
+#define EOVERFLOW       75
+#define EILSEQ          84
 #define ENOTSOCK        88
 #define EDESTADDRREQ    89
 #define EMSGSIZE        90

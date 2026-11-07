@@ -27,12 +27,17 @@ enum {
     SYS_MMAP            = 9,
     SYS_MPROTECT        = 10,
     SYS_MUNMAP          = 11,
+    SYS_MADVISE         = 28,
     SYS_IOCTL           = 16,
     SYS_DUP             = 32,
     SYS_DUP2            = 33,
+    SYS_FCNTL           = 72,
+    SYS_EPOLL_CREATE    = 213,
+    SYS_DUP3            = 292,
     SYS_FORK            = 57,
     SYS_EXEC            = 59,
     SYS_EXIT            = 60,
+    SYS_EXIT_GROUP      = 231,
     SYS_WAITPID         = 61,
     SYS_KILL            = 62,
     SYS_MKDIR           = 83,
@@ -46,6 +51,8 @@ enum {
     SYS_GETPPID         = 110,
     SYS_OPENAT          = 257,
     SYS_FSTATAT         = 262,
+    SYS_SYMLINKAT       = 266,
+    SYS_READLINKAT      = 267,
     SYS_SIGACTION       = 13,
     SYS_SIGPROCMASK     = 14,
     SYS_SIGRETURN       = 15,
@@ -86,24 +93,34 @@ enum {
     SYS_MOUNTINFO       = 530,
     SYS_MOUNTLABEL      = 531,
     SYS_CPUINFO         = 532,
+    SYS_WAITOPTS        = 533,
+    SYS_CLOCKPARAMS     = 534,
+    SYS_SIGALTSTACK     = 131,
+    SYS_SCHED_GETAFFINITY = 204,
+    SYS_PREAD64         = 17,
+    SYS_PWRITE64        = 18,
 };
 
 
 struct bleed_stat {
     uint64_t dev;
     uint64_t ino;
+    uint64_t nlink;
     uint32_t mode;
     int32_t  uid;
     int32_t  gid;
     uint32_t pad;
-    uint64_t nlink;
     uint64_t rdev;
     int64_t  size;
     int64_t  blksize;
     int64_t  blocks;
     int64_t  atime;
+    int64_t  atime_nsec;
     int64_t  mtime;
+    int64_t  mtime_nsec;
     int64_t  ctime;
+    int64_t  ctime_nsec;
+    int64_t  unused[3];
 };
 
 typedef struct syscall_dirent {
@@ -133,7 +150,12 @@ long _dup2(int oldfd, int newfd);
 long _dup(int fd);
 int _openat(int dirfd, const char *path, int flags);
 long _fstatat(int dirfd, const char *path, struct bleed_stat *st, int flags);
+long _symlinkat(const char *target, int dirfd, const char *path);
+long _readlinkat(int dirfd, const char *path, char *buf, size_t size);
 long _pipe(int fds[2]);
+long _pipe2(int fds[2], int flags);
+long _fcntl(int fd, int cmd, long arg);
+long _dup3(int oldfd, int newfd, int flags);
 long _stat(const char *path, struct bleed_stat *st);
 long _fstat(int fd, struct bleed_stat *st);
 long _readdir(int fd, size_t index, dirent_t *out);
@@ -150,6 +172,17 @@ long _exec(const char *path, const char *const argv[], uint64_t argc);
 long _execve(const char *path, const char *const argv[], uint64_t argc, const char *const envp[]);
 long _waitpid(long pid);
 long _waitstatus(long pid, int *status);
+
+typedef struct user_clock_params {
+    uint64_t tsc_base;
+    uint64_t counts_base;
+    uint64_t mult;
+    uint64_t counts_per_sec;
+    uint64_t fs_per_tick;
+    uint64_t realtime_base_ns;
+} user_clock_params_t;
+
+long _waitopts(long pid, int *status, long options);
 long _arch_prctl(long code, uint64_t addr);
 long _getpid(void);
 long _getppid(void);
@@ -164,12 +197,19 @@ long _cpuinfo(uint64_t index, user_cpu_info_t *info);
 
 // signals
 long _sigaction(int sig, const sigaction_t *act, sigaction_t *oldact);
-long _sigprocmask(int how, const sigset_t *set, sigset_t *oldset);
+long _sigprocmask(int how, const void *set, void *oldset);
+long _sigaltstack(const stack_t *ss, stack_t *old);
+long _sched_getaffinity(long pid, size_t len, void *mask);
+long _pread64(int fd, void *buf, size_t len, long offset);
+long _pwrite64(int fd, const void *buf, size_t len, long offset);
 long _sigreturn(void);
 
 // memory
 void* _mmap(unsigned long pages);
 void _munmap(void* addr);
+long _mmap_full(void *addr, size_t len, int prot, int flags, int fd, long off);
+long _munmap_range(void *addr, size_t len);
+long _madvise(void *addr, size_t len, int advice);
 long _mprotect(void *addr, unsigned long len, int prot);
 void* mapfb(size_t *out_pages);
 int _meminfo(system_memory_info_t *buf);

@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <stdint.h>
 #include <bleed/syscalls.h>
+#include "../thread/thread.h"
 
 #define PAGE_SIZE       4096
 #define ARENA_SIZE      (256 * 1024)
@@ -26,6 +28,8 @@ typedef struct chunk {
 } chunk_t;
 
 _Static_assert(HDR % 16 == 0, "malloc header has to keep pointers 16 aligned");
+
+volatile int __malloc_lock;
 
 static chunk_t *bins[NBINS];
 static uint64_t bin_map[NBINS / 64];
@@ -198,14 +202,18 @@ void *malloc(size_t n) {
         return payload(c);
     }
 
+    lock_take(&__malloc_lock);
     chunk_t *c = find_fit(need);
     if (!c) {
-        if (grow(need) < 0)
+        if (grow(need) < 0) {
+            lock_give(&__malloc_lock);
             return NULL;
+        }
         c = find_fit(need);
     }
 
     take(c, need);
+    lock_give(&__malloc_lock);
     return payload(c);
 }
 
@@ -215,12 +223,14 @@ void free(void *p) {
 
     chunk_t *c = from_payload(p);
     if (c->size & MMAPPED) {
-        _munmap(c);
+        _munmap((char *)c - c->prev_size);
         return;
     }
 
+    lock_take(&__malloc_lock);
     c->size &= ~(size_t)INUSE;
     release(c);
+    lock_give(&__malloc_lock);
 }
 
 void *realloc(void *p, size_t n) {
@@ -242,8 +252,10 @@ void *realloc(void *p, size_t n) {
         if (need <= size)
             return p;
     } else {
+        lock_take(&__malloc_lock);
         if (need <= size) {
             trim(c, need);
+            lock_give(&__malloc_lock);
             return p;
         }
 
@@ -254,8 +266,10 @@ void *realloc(void *p, size_t n) {
             c->size += chunk_size(next);
             chunk_at(c, chunk_size(c))->size |= PREV_INUSE;
             trim(c, need);
+            lock_give(&__malloc_lock);
             return p;
         }
+        lock_give(&__malloc_lock);
     }
 
     void *np = malloc(n);
@@ -275,4 +289,77 @@ void *calloc(size_t nmemb, size_t size) {
     if (p)
         memset(p, 0, total);
     return p;
+}
+
+// alignment past 16
+void *memalign(size_t align, size_t n) {
+    if (align <= 16)
+        return malloc(n);
+    if (align & (align - 1))
+        return NULL;
+
+    size_t need = request_size(n);
+    if (!need || need > (size_t)-1 - align - MIN_CHUNK - PAGE_SIZE)
+        return NULL;
+
+    if (need + align >= MMAP_THRESHOLD) {
+        size_t pages = (need + align + PAGE_SIZE - 1) / PAGE_SIZE;
+        uintptr_t mem = (uintptr_t)_mmap(pages);
+        if (!mem || (intptr_t)mem < 0)
+            return NULL;
+        uintptr_t pay = (mem + HDR + align - 1) & ~(uintptr_t)(align - 1);
+        chunk_t *c = (chunk_t *)(pay - HDR);
+        c->prev_size = (uintptr_t)c - mem;
+        c->size = (pages * PAGE_SIZE - c->prev_size) | MMAPPED | INUSE;
+        return payload(c);
+    }
+
+    void *p = malloc(need + align + MIN_CHUNK);
+    if (!p)
+        return NULL;
+
+    lock_take(&__malloc_lock);
+    chunk_t *c = from_payload(p);
+    if (((uintptr_t)p & (align - 1)) == 0) {
+        trim(c, need);
+        lock_give(&__malloc_lock);
+        return p;
+    }
+
+    uintptr_t ap    = ((uintptr_t)p + MIN_CHUNK + align - 1) & ~(uintptr_t)(align - 1);
+    chunk_t  *ac    = from_payload((void *)ap);
+    size_t    lead  = (uintptr_t)ac - (uintptr_t)c;
+    size_t    total = chunk_size(c);
+
+    ac->size = (total - lead) | INUSE;
+    c->size  = lead | (c->size & PREV_INUSE);
+    release(c);
+    trim(ac, need);
+    lock_give(&__malloc_lock);
+    return (void *)ap;
+}
+
+void *aligned_alloc(size_t align, size_t n) {
+    return memalign(align, n);
+}
+
+int posix_memalign(void **out, size_t align, size_t n) {
+    if (align < sizeof(void *) || (align & (align - 1)))
+        return EINVAL;
+    void *p = memalign(align, n ? n : 1);
+    if (!p)
+        return ENOMEM;
+    *out = p;
+    return 0;
+}
+
+void *valloc(size_t n) {
+    return memalign(PAGE_SIZE, n);
+}
+
+size_t malloc_usable_size(void *p) {
+    if (!p)
+        return 0;
+    chunk_t *c = from_payload(p);
+    return chunk_size(c) - HDR;
 }

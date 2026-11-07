@@ -180,3 +180,8 @@ float strtof(const char *nptr, char **endptr) {
 long double strtold(const char *nptr, char **endptr) {
     return strtod(nptr, endptr);
 }
+
+// only the c locale exists
+float       strtof_l(const char *nptr, char **endptr, struct __locale_struct *loc)  { (void)loc; return strtof(nptr, endptr); }
+double      strtod_l(const char *nptr, char **endptr, struct __locale_struct *loc)  { (void)loc; return strtod(nptr, endptr); }
+long double strtold_l(const char *nptr, char **endptr, struct __locale_struct *loc) { (void)loc; return strtold(nptr, endptr); }

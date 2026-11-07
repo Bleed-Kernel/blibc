@@ -101,10 +101,12 @@ int vfprintf(FILE *stream, const char *fmt, va_list ap) {
         return -1;
     }
 
+    flockfile(stream);
     ret = vdprintf(stream->fd, fmt, ap);
     if (ret < 0) {
         stream->error = 1;
     }
+    funlockfile(stream);
     return ret;
 }
 

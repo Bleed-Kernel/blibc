@@ -13,6 +13,7 @@
 #include "compat_errno.h"
 
 const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+const struct in6_addr in6addr_loopback = IN6ADDR_LOOPBACK_INIT;
 
 static long net_syscall(long nr, long a, long b, long c, long d, long e, long f) {
     long ret;
@@ -92,56 +93,16 @@ int shutdown(int fd, int how) {
     return (int)net_ret(net_syscall(SYS_SOCK_SHUTDOWN, fd, how, 0, 0, 0, 0));
 }
 
-static size_t iov_total(const struct iovec *iov, size_t count) {
-    size_t total = 0;
-    for (size_t i = 0; i < count; i++)
-        total += iov[i].iov_len;
-    return total;
-}
-
-// the kernel takes one buffer, a datagram has to stay in one piece
 ssize_t sendmsg(int fd, const struct msghdr *msg, int flags) {
-    size_t total = iov_total(msg->msg_iov, msg->msg_iovlen);
-    char  *flat  = malloc(total ? total : 1);
-    if (!flat) {
-        errno = ENOMEM;
-        return -1;
-    }
-
-    size_t at = 0;
-    for (size_t i = 0; i < msg->msg_iovlen; i++) {
-        memcpy(flat + at, msg->msg_iov[i].iov_base, msg->msg_iov[i].iov_len);
-        at += msg->msg_iov[i].iov_len;
-    }
-
-    ssize_t r = sendto(fd, flat, total, flags, msg->msg_name, msg->msg_namelen);
-    free(flat);
-    return r;
+    return net_ret(net_syscall(46, fd, (long)msg, flags, 0, 0, 0));
 }
 
 ssize_t recvmsg(int fd, struct msghdr *msg, int flags) {
-    size_t total = iov_total(msg->msg_iov, msg->msg_iovlen);
-    char  *flat  = malloc(total ? total : 1);
-    if (!flat) {
-        errno = ENOMEM;
-        return -1;
-    }
+    return net_ret(net_syscall(47, fd, (long)msg, flags, 0, 0, 0));
+}
 
-    ssize_t r = recvfrom(fd, flat, total, flags, msg->msg_name, msg->msg_name ? &msg->msg_namelen : NULL);
-    if (r > 0) {
-        size_t at = 0;
-        for (size_t i = 0; i < msg->msg_iovlen && at < (size_t)r; i++) {
-            size_t n = (size_t)r - at;
-            if (n > msg->msg_iov[i].iov_len)
-                n = msg->msg_iov[i].iov_len;
-            memcpy(msg->msg_iov[i].iov_base, flat + at, n);
-            at += n;
-        }
-    }
-    msg->msg_controllen = 0;
-    msg->msg_flags      = 0;
-    free(flat);
-    return r;
+int socketpair(int domain, int type, int protocol, int fds[2]) {
+    return (int)net_ret(net_syscall(53, domain, type, protocol, (long)fds, 0, 0));
 }
 
 ssize_t readv(int fd, const struct iovec *iov, int count) {

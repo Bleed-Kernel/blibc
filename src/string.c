@@ -465,3 +465,14 @@ char *strcasestr(const char *haystack, const char *needle) {
     }
     return NULL;
 }
+
+// C collation is byte order, so the transform is a copy
+size_t strxfrm(char *dst, const char *src, size_t n) {
+    size_t len = strlen(src);
+    if (n) {
+        size_t c = len < n - 1 ? len : n - 1;
+        memcpy(dst, src, c);
+        dst[c] = 0;
+    }
+    return len;
+}

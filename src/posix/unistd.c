@@ -8,6 +8,7 @@
 #include <termios.h>
 
 #include "compat_errno.h"
+#include "../thread/thread.h"
 
 #define EXEC_MAX_ARGS 32
 #define BLIBC_PATH_MAX 4096
@@ -15,11 +16,18 @@
 static char *empty_environ[] = { NULL };
 char **environ = empty_environ;
 
+unsigned long *__blibc_auxv;
+
 void __blibc_set_environ(char **envp) {
-    if (envp)
+    if (envp) {
         environ = envp;
-    else
+        char **p = envp;
+        while (*p)
+            p++;
+        __blibc_auxv = (unsigned long *)(p + 1);
+    } else {
         environ = empty_environ;
+    }
 }
 
 static const char *lookup_env(const char *name, char *const envp[]) {
@@ -96,6 +104,18 @@ ssize_t write(int fd, const void *buf, size_t len) {
     return (ssize_t)ret;
 }
 
+ssize_t pread(int fd, void *buf, size_t len, off_t offset) {
+    long ret = _pread64(fd, buf, len, (long)offset);
+    if (ret < 0) return posix_errno_from_ret(ret);
+    return (ssize_t)ret;
+}
+
+ssize_t pwrite(int fd, const void *buf, size_t len, off_t offset) {
+    long ret = _pwrite64(fd, buf, len, (long)offset);
+    if (ret < 0) return posix_errno_from_ret(ret);
+    return (ssize_t)ret;
+}
+
 int close(int fd) {
     long ret = _close(fd);
     if (ret < 0) return (int)posix_errno_from_ret(ret);
@@ -115,6 +135,23 @@ int pipe(int fds[2]) {
     }
 
     long ret = _pipe(fds);
+    if (ret < 0) return (int)posix_errno_from_ret(ret);
+    return (int)ret;
+}
+
+// O_CLOEXEC and O_NONBLOCK
+int pipe2(int fds[2], int flags) {
+    if (!fds) {
+        errno = EFAULT;
+        return -1;
+    }
+    long ret = _pipe2(fds, flags);
+    if (ret < 0) return (int)posix_errno_from_ret(ret);
+    return 0;
+}
+
+int dup3(int oldfd, int newfd, int flags) {
+    long ret = _dup3(oldfd, newfd, flags);
     if (ret < 0) return (int)posix_errno_from_ret(ret);
     return (int)ret;
 }
@@ -183,7 +220,27 @@ int ipc_recv(ipc_message_t *msg) {
 }
 
 pid_t fork(void) {
+    __fork_prepare();
     long ret = _fork();
+    if (ret == 0) {
+        __fork_child();
+        return 0;
+    }
+    __fork_parent();
+    if (ret < 0)
+        return (pid_t)posix_errno_from_ret(ret);
+    return (pid_t)ret;
+}
+
+pid_t vfork(void) {
+    long ret;
+    __fork_prepare();
+    asm volatile("syscall" : "=a"(ret) : "a"(58) : "rcx", "r11", "memory");
+    if (ret == 0) {
+        __fork_child();
+        return 0;
+    }
+    __fork_parent();
     if (ret < 0)
         return (pid_t)posix_errno_from_ret(ret);
     return (pid_t)ret;

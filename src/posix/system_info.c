@@ -1,4 +1,6 @@
+#include <sys/sysinfo.h>
 #include <errno.h>
+#include <limits.h>
 #include <fcntl.h>
 #include <net/if.h>
 #include <pwd.h>
@@ -14,8 +16,8 @@
 
 #include "compat_errno.h"
 
-#define HOSTNAME_PATH "/initrd/etc/hostname"
-#define VERSION_PATH  "/initrd/proc/version"
+#define HOSTNAME_PATH "/etc/hostname"
+#define VERSION_PATH  "/proc/version"
 
 static int read_line(const char *path, char *buf, size_t size) {
     int fd = _open(path, O_RDONLY);
@@ -74,7 +76,7 @@ static struct passwd *root(void) {
     root_user.pw_gid    = 0;
     root_user.pw_gecos  = "";
     root_user.pw_dir    = (char *)(home ? home : "/");
-    root_user.pw_shell  = (char *)(shell ? shell : "/initrd/bin/verdict");
+    root_user.pw_shell  = (char *)(shell ? shell : "/bin/verdict");
     return &root_user;
 }
 
@@ -84,6 +86,38 @@ struct passwd *getpwuid(uid_t uid) {
 
 struct passwd *getpwnam(const char *name) {
     return name && strcmp(name, "root") == 0 ? root() : NULL;
+}
+
+static int copy_passwd(struct passwd *found, struct passwd *pw, char *buf, size_t len, struct passwd **res) {
+    *res = NULL;
+    if (!found)
+        return 0;
+    const char *src[5] = { found->pw_name, found->pw_passwd, found->pw_gecos, found->pw_dir, found->pw_shell };
+    char *dst[5];
+    size_t at = 0;
+    for (int i = 0; i < 5; i++) {
+        size_t n = strlen(src[i]) + 1;
+        if (at + n > len)
+            return ERANGE;
+        dst[i] = memcpy(buf + at, src[i], n);
+        at += n;
+    }
+    *pw = *found;
+    pw->pw_name = dst[0];
+    pw->pw_passwd = dst[1];
+    pw->pw_gecos = dst[2];
+    pw->pw_dir = dst[3];
+    pw->pw_shell = dst[4];
+    *res = pw;
+    return 0;
+}
+
+int getpwuid_r(uid_t uid, struct passwd *pw, char *buf, size_t len, struct passwd **res) {
+    return copy_passwd(getpwuid(uid), pw, buf, len, res);
+}
+
+int getpwnam_r(const char *name, struct passwd *pw, char *buf, size_t len, struct passwd **res) {
+    return copy_passwd(getpwnam(name), pw, buf, len, res);
 }
 
 uid_t getuid(void)  { return 0; }
@@ -110,11 +144,26 @@ char *ttyname(int fd) {
     return name;
 }
 
-// theres no symlinks anywhere
 ssize_t readlink(const char *path, char *buf, size_t size) {
-    (void)path; (void)buf; (void)size;
-    errno = EINVAL;
-    return -1;
+    char exe[PATH_MAX], full[PATH_MAX];
+    if (path && (!strcmp(path, "/proc/self/exe") || !strcmp(path, "/proc/thread-self/exe"))) {
+        if (_taskpath(getpid(), exe, sizeof(exe)) < 0) {
+            errno = ENOENT;
+            return -1;
+        }
+        const char *p = exe;
+        if (exe[0] != '/' && getcwd(full, sizeof(full))) {
+            size_t n = strlen(full);
+            snprintf(full + n, sizeof(full) - n, "%s%s", n && full[n - 1] == '/' ? "" : "/", exe);
+            p = full;
+        }
+        size_t len = strlen(p);
+        if (len > size)
+            len = size;
+        memcpy(buf, p, len);
+        return (ssize_t)len;
+    }
+    return readlinkat(AT_FDCWD, path, buf, size);
 }
 
 unsigned int if_nametoindex(const char *name) {
@@ -141,7 +190,7 @@ long sysconf(int name) {
     // the kernel only runs on the boot cpu
     case _SC_NPROCESSORS_CONF:
     case _SC_NPROCESSORS_ONLN:
-        return 1;
+        return get_nprocs();
     case _SC_PHYS_PAGES:
         if (_meminfo(&mem) != 0)
             return -1;

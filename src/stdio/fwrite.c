@@ -3,7 +3,7 @@
 #include <bleed/syscalls.h>
 #include <fcntl.h>
 
-size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream) {
+size_t fwrite_unlocked(const void *ptr, size_t size, size_t nmemb, FILE *stream) {
     if (!stream || !(stream->flags & FILE_WRITE))
         return 0;
 

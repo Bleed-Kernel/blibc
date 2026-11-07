@@ -3,7 +3,7 @@
 #include <bleed/syscalls.h>
 #include <fcntl.h>
 
-size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream) {
+size_t fread_unlocked(void *ptr, size_t size, size_t nmemb, FILE *stream) {
     if (!stream || !(stream->flags & FILE_READ))
         return 0;
 

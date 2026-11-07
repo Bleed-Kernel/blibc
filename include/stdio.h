@@ -31,9 +31,19 @@ typedef struct FILE {
     int     flags;
     int     eof;
     int     error;
+
+    volatile int lock;
+    int     lock_owner;
+    int     lock_count;
 } FILE;
 
 #define BUFSIZ 4096
+#define FILENAME_MAX 4096
+#define FOPEN_MAX    1000
+#define TMP_MAX      10000
+#define L_tmpnam     20
+#define P_tmpdir     "/tmp"
+#define L_ctermid    20
 
 #define _IOFBF 0
 #define _IOLBF 1
@@ -82,6 +92,27 @@ void rewind(FILE *stream);
 void perror(const char *s);
 
 FILE *fopen(const char *path, const char *mode);
+FILE *tmpfile(void);
+
+// streams lock themselves, these hold one across several calls
+void flockfile(FILE *stream);
+int ftrylockfile(FILE *stream);
+void funlockfile(FILE *stream);
+int getc_unlocked(FILE *stream);
+int getchar_unlocked(void);
+int putc_unlocked(int c, FILE *stream);
+int putchar_unlocked(int c);
+int fgetc_unlocked(FILE *stream);
+int fputc_unlocked(int c, FILE *stream);
+size_t fread_unlocked(void *ptr, size_t size, size_t nmemb, FILE *stream);
+size_t fwrite_unlocked(const void *ptr, size_t size, size_t nmemb, FILE *stream);
+char *fgets_unlocked(char *s, int size, FILE *stream);
+int fputs_unlocked(const char *s, FILE *stream);
+int fflush_unlocked(FILE *stream);
+int feof_unlocked(FILE *stream);
+int ferror_unlocked(FILE *stream);
+void clearerr_unlocked(FILE *stream);
+int fileno_unlocked(FILE *stream);
 FILE *fdopen(int fd, const char *mode);
 FILE *freopen(const char *path, const char *mode, FILE *stream);
 size_t fread(void *ptr, size_t size, size_t nmemb, FILE *stream);

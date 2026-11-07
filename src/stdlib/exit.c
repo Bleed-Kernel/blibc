@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include <bleed/syscalls.h>
+#include "../thread/thread.h"
+
+void __dl_fini(void);
 
 #define ATEXIT_BLOCK  32
 
@@ -18,6 +21,7 @@ typedef struct exit_block {
 
 static exit_block_t first_block;
 static exit_block_t *top = &first_block;
+static volatile int exit_lock;
 
 typedef void (*array_fn_t)(void);
 
@@ -39,20 +43,25 @@ static exit_handler_t *new_handler(void) {
     return &top->handlers[top->count++];
 }
 
+static int add_handler(exit_handler_t h) {
+    lock_take(&exit_lock);
+    exit_handler_t *slot = new_handler();
+    if (slot)
+        *slot = h;
+    lock_give(&exit_lock);
+    return slot ? 0 : -1;
+}
+
 int atexit(void (*fn)(void)) {
-    exit_handler_t *h;
-    if (!fn || !(h = new_handler()))
+    if (!fn)
         return -1;
-    *h = (exit_handler_t){ .fn = fn };
-    return 0;
+    return add_handler((exit_handler_t){ .fn = fn });
 }
 
 int __blibc_atexit_arg(void (*fn)(void *), void *arg) {
-    exit_handler_t *h;
-    if (!fn || !(h = new_handler()))
+    if (!fn)
         return -1;
-    *h = (exit_handler_t){ .arg_fn = fn, .arg = arg };
-    return 0;
+    return add_handler((exit_handler_t){ .arg_fn = fn, .arg = arg });
 }
 
 // constructors, c ones and c++ globals (g++ puts those in .ctors, ld folds that into .init_array)
@@ -66,21 +75,37 @@ void __blibc_init_array(void) {
 // handlers run last registered first, then the destructors
 __attribute__((noreturn))
 void exit(int code){
-    for (;;) {
-        while (top->count > 0) {
-            exit_handler_t h = top->handlers[--top->count];
-            if (h.fn)
-                h.fn();
-            else
-                h.arg_fn(h.arg);
-        }
-        if (!top->prev)
-            break;
-        top = top->prev;
+    static volatile int exiting;
+    if (__atomic_exchange_n(&exiting, 1, __ATOMIC_ACQ_REL)) {
+        for (;;)
+            futex_wait(&exiting, 1, NULL);
     }
 
+    __blibc_run_tls_dtors();
+
+    for (;;) {
+        lock_take(&exit_lock);
+        while (top->count == 0 && top->prev)
+            top = top->prev;
+        if (top->count == 0) {
+            lock_give(&exit_lock);
+            break;
+        }
+        exit_handler_t h = top->handlers[--top->count];
+        lock_give(&exit_lock);
+
+        if (h.fn)
+            h.fn();
+        else
+            h.arg_fn(h.arg);
+    }
+
+#ifdef BLIBC_SHARED
+    __dl_fini();
+#else
     for (array_fn_t *f = __fini_array_end; f > __fini_array_start; )
         (*--f)();
+#endif
 
     _exit(code);
     __builtin_unreachable();

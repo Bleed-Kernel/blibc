@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 
-#define SYSTEM_SHELL "/initrd/bin/verdict"
+#define SYSTEM_SHELL "/bin/verdict"
 
 int system(const char *command) {
     if (!command)

@@ -28,7 +28,7 @@ extern "C" {
 #define EPOLL_CTL_ADD   1
 #define EPOLL_CTL_DEL   2
 #define EPOLL_CTL_MOD   3
-#define EPOLL_CLOEXEC   (1 << 0)
+#define EPOLL_CLOEXEC   0x80000
 
 typedef union epoll_data {
     void       *ptr;
@@ -44,6 +44,7 @@ struct epoll_event {
 
 typedef struct epoll_event epoll_event_t;
 
+int epoll_create(int size);
 int epoll_create1(int flags);
 int epoll_ctl(int epfd, int op, int fd, struct epoll_event *event);
 int epoll_wait(int epfd, struct epoll_event *events, int maxevents, int timeout);

@@ -65,6 +65,32 @@ int getnameinfo(const struct sockaddr *addr, socklen_t addrlen, char *host, sock
 const char *gai_strerror(int err);
 struct hostent *gethostbyname(const char *name);
 
+struct protoent {
+    char  *p_name;
+    char **p_aliases;
+    int    p_proto;
+};
+
+// the few protocols /etc/protocols would list
+struct protoent *getprotobyname(const char *name);
+struct protoent *getprotobynumber(int proto);
+struct protoent *getprotoent(void);
+void setprotoent(int stayopen);
+void endprotoent(void);
+
+struct hostent *gethostbyaddr(const void *addr, socklen_t len, int type);
+
+struct servent {
+    char  *s_name;
+    char **s_aliases;
+    int    s_port;
+    char  *s_proto;
+};
+
+// the handful of services firefox and libevent ask about
+struct servent *getservbyname(const char *name, const char *proto);
+struct servent *getservbyport(int port, const char *proto);
+
 #ifdef __cplusplus
 }
 #endif

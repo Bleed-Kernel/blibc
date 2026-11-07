@@ -26,32 +26,46 @@ int fcntl(int fd, int cmd, ...) {
     int in_flags = 0;
 
     switch (cmd) {
-    // nothing is ever closed on exec, so the only descriptor flag reads as unset
     case F_GETFD:
     case F_SETFD:
-        return 0;
-    case F_DUPFD: {
+    case F_DUPFD:
+    case F_DUPFD_CLOEXEC:
+    case F_ADD_SEALS:
+    case F_GET_SEALS: {
         va_start(ap, cmd);
-        int lowest = va_arg(ap, int);
+        long arg = (cmd == F_GETFD || cmd == F_GET_SEALS) ? 0 : va_arg(ap, int);
         va_end(ap);
-
-        struct bleed_stat st;
-        for (int target = lowest; target < 256; target++) {
-            if (_fstat(target, &st) == -EBADF) {
-                long ret = _dup2(fd, target);
-                return ret < 0 ? (int)posix_errno_from_ret(ret) : (int)ret;
-            }
-        }
-        errno = EMFILE;
-        return -1;
+        long ret = _fcntl(fd, cmd, arg);
+        return ret < 0 ? (int)posix_errno_from_ret(ret) : (int)ret;
     }
-    case F_GETFL:
-        if (_ioctl(fd, TTY_IOCTL_GET_FLAGS, &flags) < 0) {
-            errno = ENOTTY;
-            return -1;
-        }
-        if (flags & TTY_NONBLOCK) in_flags |= O_NONBLOCK;
+    case F_SETLK:
+    case F_SETLKW:
+    case F_OFD_SETLK:
+    case F_OFD_SETLKW:
+        return 0;
+    case F_GETLK:
+    case F_OFD_GETLK: {
+        va_start(ap, cmd);
+        struct flock *fl = va_arg(ap, struct flock *);
+        va_end(ap);
+        if (fl)
+            fl->l_type = F_UNLCK;
+        return 0;
+    }
+    case F_SETOWN:
+        return 0;
+    case F_GETOWN:
+        return 0;
+    case F_GETFL: {
+        // the kernel knows how a file was opened, a tty keeps its own nonblock flag
+        long ret = _fcntl(fd, F_GETFL, 0);
+        if (ret < 0)
+            return (int)posix_errno_from_ret(ret);
+        in_flags = (int)ret;
+        if (_ioctl(fd, TTY_IOCTL_GET_FLAGS, &flags) == 0 && (flags & TTY_NONBLOCK))
+            in_flags |= O_NONBLOCK;
         return in_flags;
+    }
     case F_SETFL: {
         int nonblock = 0;
         va_start(ap, cmd);

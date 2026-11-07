@@ -95,6 +95,9 @@ char *strstr(const char *haystack, const char *needle);
 char *strcasestr(const char *haystack, const char *needle);
 
 char *strerror(int errnum);
+// the posix one, 0 or an errno
+int strerror_r(int errnum, char *buf, size_t len);
+size_t strxfrm(char *dst, const char *src, size_t n);
 void *memchr(const void *s, int c, size_t n);
 void *memrchr(const void *s, int c, size_t n);
 size_t strnlen(const char *s, size_t max);
@@ -115,6 +118,8 @@ char *strtok(char *__restrict s, const char *__restrict delim);
 /// @param save state pointer
 /// @return next token
 char *strtok_r(char *__restrict s, const char *__restrict delim, char **__restrict save);
+
+char *strsep(char **stringp, const char *delim);
 
 #ifdef __cplusplus
 }

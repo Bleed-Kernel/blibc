@@ -69,6 +69,29 @@ int _openat(int dirfd, const char *path, int flags) {
     return (int)ret;
 }
 
+long _symlinkat(const char *target, int dirfd, const char *path) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_SYMLINKAT), "D"(target), "S"((long)dirfd), "d"(path)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _readlinkat(int dirfd, const char *path, char *buf, size_t size) {
+    long ret;
+    register long r10 asm("r10") = (long)size;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_READLINKAT), "D"((long)dirfd), "S"(path), "d"(buf), "r"(r10)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
 long _fstatat(int dirfd, const char *path, struct bleed_stat *st, int flags) {
     long ret;
     register long r10 asm("r10") = flags;
@@ -115,8 +138,9 @@ static inline long sys_exit(long n, long a1) {
     return ret;
 }
 
+// the whole process, SYS_EXIT only ends the calling thread now
 void _exit(int code) {
-    sys_exit(SYS_EXIT, code);
+    sys_exit(SYS_EXIT_GROUP, code);
     __builtin_unreachable();
 }
 
@@ -250,34 +274,59 @@ int _mkdir(const char *path, int mode) {
     return syscall_mkdir(path, mode);
 }
 
-static inline void* syscall_mmap(size_t pages) {
-    void* ret;
+static inline long syscall_mmap(void *addr, size_t len, int prot, int flags, int fd, long off) {
+    long ret;
+    register long r10 asm("r10") = flags;
+    register long r8 asm("r8") = fd;
+    register long r9 asm("r9") = off;
     asm volatile(
         "syscall"
         : "=a"(ret)
-        : "a"(SYS_MMAP), "D"(pages)
+        : "a"(SYS_MMAP), "D"(addr), "S"(len), "d"(prot), "r"(r10), "r"(r8), "r"(r9)
         : "rcx", "r11", "memory"
     );
-    if ((uintptr_t)ret == (uintptr_t)-1)
-        return NULL;
     return ret;
 }
 
-void* _mmap(unsigned long pages) {
-    return syscall_mmap(pages);
+long _mmap_full(void *addr, size_t len, int prot, int flags, int fd, long off) {
+    return syscall_mmap(addr, len, prot, flags, fd, off);
 }
 
-static inline void syscall_munmap(void* addr) {
+// zeroed read write pages, filled in as theyre touched
+void* _mmap(unsigned long pages) {
+    long ret = syscall_mmap(NULL, pages * 4096, 0x3, 0x22, -1, 0);
+    return ret < 0 ? NULL : (void *)ret;
+}
+
+static inline long syscall_munmap(void* addr, size_t len) {
+    long ret;
     asm volatile(
         "syscall"
-        :
-        : "a"(SYS_MUNMAP), "D"(addr)
+        : "=a"(ret)
+        : "a"(SYS_MUNMAP), "D"(addr), "S"(len)
         : "rcx", "r11", "memory"
     );
+    return ret;
 }
 
+long _munmap_range(void *addr, size_t len) {
+    return syscall_munmap(addr, len);
+}
+
+// the whole mapping that starts at addr
 void _munmap(void* addr) {
-    syscall_munmap(addr);
+    syscall_munmap(addr, 0);
+}
+
+long _madvise(void *addr, size_t len, int advice) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_MADVISE), "D"(addr), "S"(len), "d"(advice)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
 }
 
 static inline long syscall_open(const char *path, int flags) {
@@ -297,19 +346,42 @@ int _open(const char *path, int flags) {
     return (int)syscall_open(path, flags);
 }
 
-static inline long syscall_pipe(int fds[2]) {
+static inline long syscall_pipe(int fds[2], int flags) {
     long ret;
     asm volatile(
         "syscall"
         : "=a"(ret)
-        : "a"(SYS_PIPE), "D"(fds)
+        : "a"(SYS_PIPE), "D"(fds), "S"((long)flags)
         : "rcx", "r11", "memory"
     );
     return ret;
 }
 
 long _pipe(int fds[2]) {
-    return syscall_pipe(fds);
+    return syscall_pipe(fds, 0);
+}
+
+long _pipe2(int fds[2], int flags) {
+    return syscall_pipe(fds, flags);
+}
+
+static inline long syscall3(long n, long a, long b, long c) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(n), "D"(a), "S"(b), "d"(c)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _fcntl(int fd, int cmd, long arg) {
+    return syscall3(SYS_FCNTL, fd, cmd, arg);
+}
+
+long _dup3(int oldfd, int newfd, int flags) {
+    return syscall3(SYS_DUP3, oldfd, newfd, flags);
 }
 
 static inline long syscall_read(int fd, void *buf, unsigned long len) {
@@ -400,7 +472,7 @@ long _sigaction(int sig, const sigaction_t *act, sigaction_t *oldact) {
     return syscall_sigaction(sig, act, oldact);
 }
 
-static inline long syscall_sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
+static inline long syscall_sigprocmask(int how, const void *set, void *oldset) {
     long ret;
     asm volatile(
         "syscall"
@@ -414,7 +486,7 @@ static inline long syscall_sigprocmask(int how, const sigset_t *set, sigset_t *o
     return ret;
 }
 
-long _sigprocmask(int how, const sigset_t *set, sigset_t *oldset) {
+long _sigprocmask(int how, const void *set, void *oldset) {
     return syscall_sigprocmask(how, set, oldset);
 }
 
@@ -637,6 +709,17 @@ long _arch_prctl(long code, uint64_t addr) {
     return ret;
 }
 
+long _waitopts(long pid, int *status, long options) {
+    long ret;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(SYS_WAITOPTS), "D"(pid), "S"(status), "d"(options)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
 long _waitstatus(long pid, int *status) {
     long ret;
     asm volatile(
@@ -689,4 +772,32 @@ static inline long syscall_poll(struct pollfd *fds, unsigned long nfds, long tim
 
 long _poll(struct pollfd *fds, unsigned long nfds, long timeout_ms) {
     return syscall_poll(fds, nfds, timeout_ms);
+}
+
+long _sigaltstack(const stack_t *ss, stack_t *old) {
+    return syscall3(SYS_SIGALTSTACK, (long)ss, (long)old, 0);
+}
+
+long _sched_getaffinity(long pid, size_t len, void *mask) {
+    return syscall3(SYS_SCHED_GETAFFINITY, pid, (long)len, (long)mask);
+}
+
+static inline long syscall4(long n, long a, long b, long c, long d) {
+    long ret;
+    register long r10 __asm__("r10") = d;
+    asm volatile(
+        "syscall"
+        : "=a"(ret)
+        : "a"(n), "D"(a), "S"(b), "d"(c), "r"(r10)
+        : "rcx", "r11", "memory"
+    );
+    return ret;
+}
+
+long _pread64(int fd, void *buf, size_t len, long offset) {
+    return syscall4(SYS_PREAD64, fd, (long)buf, (long)len, offset);
+}
+
+long _pwrite64(int fd, const void *buf, size_t len, long offset) {
+    return syscall4(SYS_PWRITE64, fd, (long)buf, (long)len, offset);
 }
